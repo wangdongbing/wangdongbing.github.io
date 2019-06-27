@@ -98,18 +98,18 @@
 
 
 
-  <meta name="description" content="Java远程debugjava -Xdebug -Xrunjdwp:transport=dt_socket, server=y, suspend=n, address=8787 -jar xx.jar">
+  <meta name="description" content="Linux服务器以及JVM日常工具、命令 Linux解压/打包jar12jar  -xvf  xx.jar jar  -cvfM0  xx.jar  ./ 12unzip XXX.jar -d appjar cvfm0 MR-XDR-JMR-NEW.jar META-INF/MANIFEST.MF">
 <meta name="keywords" content="工具,系统,命令">
 <meta property="og:type" content="article">
 <meta property="og:title" content="日常使用工具命令大全">
 <meta property="og:url" content="http://www.wangdongbing.com/2019/06/10/常用工具/index.html">
 <meta property="og:site_name" content="WDB">
-<meta property="og:description" content="Java远程debugjava -Xdebug -Xrunjdwp:transport=dt_socket, server=y, suspend=n, address=8787 -jar xx.jar">
+<meta property="og:description" content="Linux服务器以及JVM日常工具、命令 Linux解压/打包jar12jar  -xvf  xx.jar jar  -cvfM0  xx.jar  ./ 12unzip XXX.jar -d appjar cvfm0 MR-XDR-JMR-NEW.jar META-INF/MANIFEST.MF">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-06-10T11:17:29.109Z">
+<meta property="og:updated_time" content="2019-06-19T09:50:29.667Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="日常使用工具命令大全">
-<meta name="twitter:description" content="Java远程debugjava -Xdebug -Xrunjdwp:transport=dt_socket, server=y, suspend=n, address=8787 -jar xx.jar">
+<meta name="twitter:description" content="Linux服务器以及JVM日常工具、命令 Linux解压/打包jar12jar  -xvf  xx.jar jar  -cvfM0  xx.jar  ./ 12unzip XXX.jar -d appjar cvfm0 MR-XDR-JMR-NEW.jar META-INF/MANIFEST.MF">
 
 
 
@@ -385,12 +385,24 @@
                 
               
 
-              <time title="创建时间：2019-06-10 19:13:08 / 修改时间：19:17:29" itemprop="dateCreated datePublished" datetime="2019-06-10T19:13:08+08:00">2019-06-10</time>
+              <time title="创建时间：2019-06-10 19:13:08" itemprop="dateCreated datePublished" datetime="2019-06-10T19:13:08+08:00">2019-06-10</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-06-19 17:50:29" itemprop="dateModified" datetime="2019-06-19T17:50:29+08:00">2019-06-19</time>
               
             
           </span>
@@ -442,7 +454,20 @@
       
 
       
-        <h1 id="Java远程debug"><a href="#Java远程debug" class="headerlink" title="Java远程debug"></a>Java远程debug</h1><p>java -Xdebug -Xrunjdwp:transport=dt_socket, server=y, suspend=n, address=8787 -jar xx.jar</p>
+        <p>Linux服务器以及JVM日常工具、命令</p>
+<h1 id="Linux解压-打包jar"><a href="#Linux解压-打包jar" class="headerlink" title="Linux解压/打包jar"></a>Linux解压/打包jar</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">jar  -xvf  xx.jar </span><br><span class="line">jar  -cvfM0  xx.jar  ./</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">unzip XXX.jar -d app</span><br><span class="line">jar cvfm0 MR-XDR-JMR-NEW.jar META-INF/MANIFEST.MF</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<h1 id="Java远程debug"><a href="#Java远程debug" class="headerlink" title="Java远程debug"></a>Java远程debug</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -Xdebug -Xrunjdwp:transport=dt_socket, server=y, suspend=n, address=8787 -jar xx.jar</span><br></pre></td></tr></table></figure>
+<h1 id="线程定位"><a href="#线程定位" class="headerlink" title="线程定位"></a>线程定位</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">top 获取当前CPU使用率</span><br><span class="line">top -Hp pid 获取当前进程中各个线程资源使用情况</span><br><span class="line">jstack pid 获取当前进程中线程堆栈</span><br><span class="line">将资源使用率较高的线程pid转为16进制，并且在线程堆栈中通过nid找到对应线程</span><br><span class="line">查看线程状态 RUNNABLE / WAITING / BLOCKED</span><br></pre></td></tr></table></figure>
+<h1 id="JVM内存查看"><a href="#JVM内存查看" class="headerlink" title="JVM内存查看"></a>JVM内存查看</h1><h2 id="系统内存相关"><a href="#系统内存相关" class="headerlink" title="系统内存相关"></a>系统内存相关</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cat /proc/meminfo 查看系统内存</span><br><span class="line">free -m  获取内存使用情况 （-K, -M ,-G）</span><br></pre></td></tr></table></figure>
+<p>total:总计物理内存的大小, used:已使用多大, free:可用有多少, Shared:多个进程共享的内存总额, Buffers/cached:磁盘缓存的大小。</p>
+<h2 id="JVM内存相关"><a href="#JVM内存相关" class="headerlink" title="JVM内存相关"></a>JVM内存相关</h2><p>jinfo pid / jinfo -flags pid 查看指定pid的所有JVM信息<br>jmap -heap pid 查看堆内存使用情况<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Xms/InitialHeapSize | 堆内存大小的初始值</span><br><span class="line">Xmx/MaxHeapSize | 堆内存大小的上限</span><br><span class="line">Xmn/MaxnewSize | 新生代可被分配的内存的最大上限</span><br><span class="line">XX:NewRatio | Yong和Old的比例|默认为2</span><br><span class="line">XX:SurvivorRatio | Survivor:Eden|默认为8</span><br></pre></td></tr></table></figure></p>
+<h2 id="Jstat"><a href="#Jstat" class="headerlink" title="Jstat"></a>Jstat</h2><p>jstat -gcutil pid / jstat -gc pid</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">S0: Survivor 0区的空间使用率 Survivor space 0 utilization as a percentage of the space<span class="string">'s current capacity. </span></span><br><span class="line"><span class="string">S1: Survivor 1区的空间使用率 Survivor space 1 utilization as a percentage of the space'</span>s current capacity. </span><br><span class="line">E: Eden区的空间使用率 Eden space utilization as a percentage of the space<span class="string">'s current capacity. </span></span><br><span class="line"><span class="string">O: 老年代的空间使用率 Old space utilization as a percentage of the space'</span>s current capacity. </span><br><span class="line">M: 元数据的空间使用率 Metaspace utilization as a percentage of the space<span class="string">'s current capacity. </span></span><br><span class="line"><span class="string">CCS: 类指针压缩空间使用率 Compressed class space utilization as a percentage. </span></span><br><span class="line"><span class="string">YGC: 新生代GC次数 Number of young generation GC events. </span></span><br><span class="line"><span class="string">YGCT: 新生代GC总时长 Young generation garbage collection time. </span></span><br><span class="line"><span class="string">FGC: Full GC次数 Number of full GC events. </span></span><br><span class="line"><span class="string">FGCT: Full GC总时长 Full garbage collection time. </span></span><br><span class="line"><span class="string">GCT: 总共的GC时长 Total garbage collection time.</span></span><br></pre></td></tr></table></figure>
+<h2 id="JVM启动配置"><a href="#JVM启动配置" class="headerlink" title="JVM启动配置"></a>JVM启动配置</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Xms512m -Xmx2024m -Xmn256m -XX:PermSize=128m -XX:MaxPermSize=128m -XX:+UseParallelGC -XX:TargetSurvivorRatio=70 -XX:+UseAdaptiveSizePolicy -Djava.awt.headless=<span class="literal">true</span></span><br></pre></td></tr></table></figure>
+<h2 id="java-gc-log"><a href="#java-gc-log" class="headerlink" title="java gc log"></a>java gc log</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">-XX:+PrintGC 输出GC日志</span><br><span class="line">-XX:+PrintGCDetails 输出GC的详细日志</span><br><span class="line">-XX:+PrintGCTimeStamps 输出GC的时间戳（以基准时间的形式）</span><br><span class="line">-XX:+PrintGCDateStamps 输出GC的时间戳（以日期的形式，如 2013-05-04T21:53:59.234+0800）</span><br><span class="line">-XX:+PrintHeapAtGC 在进行GC的前后打印出堆的信息</span><br><span class="line">-Xloggc:../logs/gc.log 日志文件的输出路径</span><br><span class="line"> -XX:+PrintGCDateStamps -XX:+PrintGCDetails -Xloggc:./gclogs</span><br></pre></td></tr></table></figure>
+<h2 id="dump"><a href="#dump" class="headerlink" title="dump"></a>dump</h2><p>获取当前dump文件  jmap -dump:format=b,file=serviceDump.dat 104390</p>
 
       
     </div>
@@ -492,6 +517,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/06/19/Redis数据结构介绍/" rel="prev" title="Redis数据结构介绍">
+                Redis数据结构介绍 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -560,7 +589,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-count">6</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -583,7 +612,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">3</span>
+                      
+                    
+                    <span class="site-state-item-count">4</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -616,7 +647,13 @@
                     
                       
                     
-                    <span class="site-state-item-count">8</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -652,7 +689,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Java远程debug"><span class="nav-number">1.</span> <span class="nav-text">Java远程debug</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Linux解压-打包jar"><span class="nav-number">1.</span> <span class="nav-text">Linux解压/打包jar</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Java远程debug"><span class="nav-number">2.</span> <span class="nav-text">Java远程debug</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#线程定位"><span class="nav-number">3.</span> <span class="nav-text">线程定位</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JVM内存查看"><span class="nav-number">4.</span> <span class="nav-text">JVM内存查看</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#系统内存相关"><span class="nav-number">4.1.</span> <span class="nav-text">系统内存相关</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM内存相关"><span class="nav-number">4.2.</span> <span class="nav-text">JVM内存相关</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Jstat"><span class="nav-number">4.3.</span> <span class="nav-text">Jstat</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM启动配置"><span class="nav-number">4.4.</span> <span class="nav-text">JVM启动配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#java-gc-log"><span class="nav-number">4.5.</span> <span class="nav-text">java gc log</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dump"><span class="nav-number">4.6.</span> <span class="nav-text">dump</span></a></li></ol></li></ol></div>
             
 
           </div>

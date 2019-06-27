@@ -109,7 +109,7 @@
 <meta property="og:image" content="http://p1.meituan.net/scarlett/d65d09b08a3f6432fdfa622421d16aeb25333.png">
 <meta property="og:image" content="http://p1.meituan.net/scarlett/4ac2789f7c1958bc81fbf7d5c10963ab473023.png">
 <meta property="og:image" content="http://p0.meituan.net/scarlett/5bf8504a2d453ee8559d10f438ecc8ae158800.png">
-<meta property="og:updated_time" content="2019-03-14T03:28:14.000Z">
+<meta property="og:updated_time" content="2019-06-14T15:53:45.126Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="美团境外度假直连系统实践">
 <meta name="twitter:description" content="背景美团点评-境外度假事业部是酒旅事业群所属的四个事业部之一，主要业务是运营境外旅游产品，度假产品，购物优惠券，境外POI信息，对于境外旅游这种业务形态，美团点评是第一次尝试，我们从15年底开始建设整个旅游的供应链系统和交易系统，和竞对相比，我们起步晚，所以，我们必须快速的建立起来整个体系，在这个体系中，直连系统承担了上接供应商商品，下接订单的角色，实现链路的闭环。 本文将从直连系统建设当中遇到的">
@@ -393,6 +393,22 @@
             
 
             
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-06-14 23:53:45" itemprop="dateModified" datetime="2019-06-14T23:53:45+08:00">2019-06-14</time>
+              
+            
           </span>
 
           
@@ -444,7 +460,7 @@
       
         <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>美团点评-境外度假事业部是酒旅事业群所属的四个事业部之一，主要业务是运营境外旅游产品，度假产品，购物优惠券，境外POI信息，对于境外旅游这种业务形态，美团点评是第一次尝试，我们从15年底开始建设整个旅游的供应链系统和交易系统，和竞对相比，我们起步晚，所以，我们必须快速的建立起来整个体系，在这个体系中，直连系统承担了上接供应商商品，下接订单的角色，实现链路的闭环。</p>
 <p>本文将从直连系统建设当中遇到的问题和解决方案和大家讨论。<br><a id="more"></a></p>
-<h1 id="从0到1"><a href="#从0到1" class="headerlink" title="从0到1"></a>从0到1</h1><h3 id="确立目标"><a href="#确立目标" class="headerlink" title="确立目标"></a>确立目标</h3><p>大家都知道，在供应链中最重要的就是供应商把自己的产品录入到我们美团点评的系统中，通常这有两种实现方式，人工上单和系统对接。显然，我们需要后发制人，必须短时间铺大量的商品上去，而这两种方式中，系统对接比人工效率要高很多，所以我们的目标之一实现供应商商品对接功能</p>
+<h1 id="从0到1"><a href="#从0到1" class="headerlink" title="从0到1"></a>从0到1</h1><h2 id="确立目标"><a href="#确立目标" class="headerlink" title="确立目标"></a>确立目标</h2><p>大家都知道，在供应链中最重要的就是供应商把自己的产品录入到我们美团点评的系统中，通常这有两种实现方式，人工上单和系统对接。显然，我们需要后发制人，必须短时间铺大量的商品上去，而这两种方式中，系统对接比人工效率要高很多，所以我们的目标之一实现供应商商品对接功能</p>
 <p>好了，现在我们产品有了，那么用户在美团点评下单之后，我们需要把订单信息同步给供应商，这样供应商才能给确认订单，然后给客人出票。这个过程也有两种方式，供应商的运营人员把我们系统中相同的订单在他们系统中重新复制一份，这就是人工搬单。还有一种就是系统对接，及我们直接通过接口把订单信息推送给供应商，这两种方式的效率和准确性方面，系统对接显然是最佳选择。</p>
 <p>随着我们业务的发展，我们平台的商品越来越多，这个时候我们还要考虑是否分销，所以直连系统还要具备分销的功能</p>
 <p>至此，我们确认了我们目标</p>
@@ -452,7 +468,7 @@
 <li>商品&amp;订单对接 </li>
 <li>分销产品</li>
 </ul>
-<h3 id="方案设计"><a href="#方案设计" class="headerlink" title="方案设计"></a>方案设计</h3><p>前面说到，直连系统负责对接供应商的商品和订单数据的对接以及未来进行的分销，而在这其中有个问题，商品的数据是分为两部分的，及商品的基本信息和价格库存，所以我们需要对接的数据有商品基本信息，价格库存，订单数据。</p>
+<h2 id="方案设计"><a href="#方案设计" class="headerlink" title="方案设计"></a>方案设计</h2><p>前面说到，直连系统负责对接供应商的商品和订单数据的对接以及未来进行的分销，而在这其中有个问题，商品的数据是分为两部分的，及商品的基本信息和价格库存，所以我们需要对接的数据有商品基本信息，价格库存，订单数据。</p>
 <p>对于商品基本信息，它的特征是相对比较固定，变化不频繁。我们可以选择主动的抓去供应商的数据，也可以选择让供应商推送，考虑到我们是平台，需要制定标准的数据格式。我们选择供应商主动推送的方式。</p>
 <p>对于价格库存则恰恰相反，价格库存都是实时的变化，尤其对于机票，酒店这种库存要求比较高的商品，所以我们要保证价格库存能够及时的更新，保证数据的一致性。鉴于价格库存对于数据的实时性和一致性要求比较高，我们采取推拉结合的模式，及供应商主动推送＋平台定时拉取</p>
 <p>第三部分则是订单数据的同步，首先来解释下我们的下单流程，用户下单－支付－取消。在直连系统的流程中我们演化为用户下单－供应商占位－支付－供应商确认－取消－供应商取消，可以看到，直连系统中的订单流程是原有订单流程的延伸。这里说下为什么需要占位接口，对于供应商来说，一个供应商的产品往往是分销到多个平台，而且大部分供应商都没法做到硬分销（及划给某一个平台固定的库存，与之相对的为软分销，及多个平台共享一份库存），所以我们需要保证用户下单时候的库存是可用的，并且占位之后是要供应商来锁定该库存，避免用户在支付之后没有库存，造成退款。</p>
@@ -461,25 +477,25 @@
 <p>供应商接入API提供商品基本信息，价格库存，订单数据的对接标准，数据开放API负责产品的分销和共享，WEB站则是供应商接入的门户。</p>
 <p>由于我们和供应商之间是http接口交互，所以对接口和网络的监控必不可少，监控只是发现问题，那么补偿则是解决问题，针对失败的请求，加入补偿队列，确保请求的最终可达。</p>
 <p>接口限流，针对我们不同的供应商需要设置各个接口的最大请求频次，在调研了公司的限流系统之后，暂时没找到适合我们场景的限流系统，所以，这个我们自己开发了一套适合我们业务的限流系统。</p>
-<h3 id="WEB站"><a href="#WEB站" class="headerlink" title="WEB站"></a>WEB站</h3><p>前面说过，直连系统的web站是供应商接入的门户，里面需要承担的功能有API文档展示，接入流程介绍，测试工具，以及系统和业务的监控，其中最主要的功能就是测试工具和实时监控</p>
-<h4 id="测试工具"><a href="#测试工具" class="headerlink" title="测试工具"></a>测试工具</h4><p>在双方系统对接中，总有一个联调过程，及双方开发约定一个时间，然后测试接口，对于平台而言，对接的供应商有成千上万家，那么，每一个都需要我们联调的话，那么这个投入是非常巨大的，那么怎么能把联调这部分工作转移给供应商，就成为测试工具要解决的问题。</p>
+<h2 id="WEB站"><a href="#WEB站" class="headerlink" title="WEB站"></a>WEB站</h2><p>前面说过，直连系统的web站是供应商接入的门户，里面需要承担的功能有API文档展示，接入流程介绍，测试工具，以及系统和业务的监控，其中最主要的功能就是测试工具和实时监控</p>
+<h3 id="测试工具"><a href="#测试工具" class="headerlink" title="测试工具"></a>测试工具</h3><p>在双方系统对接中，总有一个联调过程，及双方开发约定一个时间，然后测试接口，对于平台而言，对接的供应商有成千上万家，那么，每一个都需要我们联调的话，那么这个投入是非常巨大的，那么怎么能把联调这部分工作转移给供应商，就成为测试工具要解决的问题。</p>
 <p>为此，我们开发了如下图的自动化测试流程，由平台发起对供应商的调用，请求参数可动态配置，供应商可以自定义，我们会记录一个订单完整的生命周期，以此来判断供应商是否通过了测试，如果通过测试，则可以直接切到线上。这样，减少了我们的联调时间，供应商接入效率和质量大大提高。</p>
 <p><img src="http://p1.meituan.net/scarlett/4ac2789f7c1958bc81fbf7d5c10963ab473023.png" alt="avatar"></p>
-<h4 id="实时监控"><a href="#实时监控" class="headerlink" title="实时监控"></a>实时监控</h4><p>业务监控是WEB所必须要实现的功能之一，实时的监控系统是确保线上业务正常运营的前提，要做到有问题立即能够感知，发现，处理。为此，我们采取了心跳机制和接口监控来实时的监控供应商系统状况。</p>
+<h3 id="实时监控"><a href="#实时监控" class="headerlink" title="实时监控"></a>实时监控</h3><p>业务监控是WEB所必须要实现的功能之一，实时的监控系统是确保线上业务正常运营的前提，要做到有问题立即能够感知，发现，处理。为此，我们采取了心跳机制和接口监控来实时的监控供应商系统状况。</p>
 <p>心跳机制：我们与供应商系统之间建立每3分钟一次的心跳请求，如果失败，则频次改为1分钟1次，连续三次失败，关闭供应商交易开关，邮件短信通知供应商和负责的开发同学，订单转人工操作，做到及时发现问题，及时处理。</p>
 <p><img src="http://p0.meituan.net/scarlett/5bf8504a2d453ee8559d10f438ecc8ae158800.png" alt="avatar"></p>
 <p>接口监控：针对供应商的各个接口请求频次，响应时间做实时监控，方便对于响应比较慢和频次比较高的接口及时优化</p>
-<h3 id="沙箱环境"><a href="#沙箱环境" class="headerlink" title="沙箱环境"></a>沙箱环境</h3><p>大家都知道，互联网的系统基本都有线上和线下环境，和供应商系统对接也是一样，需要我们先在测试环境和供应商联调，然后在上线。这样的流程会有几个问题</p>
+<h2 id="沙箱环境"><a href="#沙箱环境" class="headerlink" title="沙箱环境"></a>沙箱环境</h2><p>大家都知道，互联网的系统基本都有线上和线下环境，和供应商系统对接也是一样，需要我们先在测试环境和供应商联调，然后在上线。这样的流程会有几个问题</p>
 <p>测试环境可能不是很稳定，经常会有流程不同的问题</p>
 <p>测试环境都有访问控制，比如白名单，各个供应商技术设施不同，可能经常需要添加白名单，对于国外供应商而言，这个问题更加突出</p>
 <p>测试环境测试通过，上线之后可能因为配置等原因出现问题</p>
 <p>对于这些问题，我们实现了一套沙箱环境，具体实现是共用一套线上代码和环境，数据库分为沙箱数据库和正式数据库，测试数据进入沙箱数据库，正常数据进入正式数据库。这样一来，测试的数据，环境配置，网络等都和线上一致，从沙箱环境切换线上环境不需要发布，只需要开关配置即可。</p>
 <p>自此，供应商对接所有流程都在线上进行，可以极大的减少系统发布和提高对接效率</p>
 <h1 id="精益求精"><a href="#精益求精" class="headerlink" title="精益求精"></a>精益求精</h1><p>上述结构可以满足业务发展的初期需求，随着业务拓展，系统面临这越来越多的问题和挑战，主要有以下几个方面</p>
-<h3 id="网络"><a href="#网络" class="headerlink" title="网络"></a>网络</h3><p>我们接入的国外供应商越来越多，针对国外供应商http的优化显的格外重要，怎么缩短网络调用时间是一个新的挑战，我们经历了两个阶段来优化此问题</p>
-<h4 id="香港代理"><a href="#香港代理" class="headerlink" title="香港代理"></a>香港代理</h4><p>香港代理是指，主服务在上海机房，在香港部署一个Gateway，http请求从香港机房发给国外供应商，上海机房和香港机房走RPC，这个链路相对于之前直接从上海机房发出http调用可以缩短50%以上的时间</p>
-<h4 id="长链接"><a href="#长链接" class="headerlink" title="长链接"></a>长链接</h4><p>香港代理上线初期，我们的海外供应商主要集中在亚洲，澳洲。随着更多供应商的接入，我们发现欧美供应商调用时间还是比较高，整体链路还是比较长，为此，我们的方案是：在供应商服务器以jar的形式部署我们的SDK，我们的SDK和香港接入点实现长轮询，香港接入点和我们的上海主服务通过RPC调用，这样，对于每次海外供应商接口的调用，可以省去三次握手。</p>
-<h3 id="数据一致性"><a href="#数据一致性" class="headerlink" title="数据一致性"></a>数据一致性</h3><p>随着我们的数据体量越来越大，之前供应商主动推送＋平台定时拉去面临这严峻的考验，主要问题有</p>
+<h2 id="网络"><a href="#网络" class="headerlink" title="网络"></a>网络</h2><p>我们接入的国外供应商越来越多，针对国外供应商http的优化显的格外重要，怎么缩短网络调用时间是一个新的挑战，我们经历了两个阶段来优化此问题</p>
+<h3 id="香港代理"><a href="#香港代理" class="headerlink" title="香港代理"></a>香港代理</h3><p>香港代理是指，主服务在上海机房，在香港部署一个Gateway，http请求从香港机房发给国外供应商，上海机房和香港机房走RPC，这个链路相对于之前直接从上海机房发出http调用可以缩短50%以上的时间</p>
+<h3 id="长链接"><a href="#长链接" class="headerlink" title="长链接"></a>长链接</h3><p>香港代理上线初期，我们的海外供应商主要集中在亚洲，澳洲。随着更多供应商的接入，我们发现欧美供应商调用时间还是比较高，整体链路还是比较长，为此，我们的方案是：在供应商服务器以jar的形式部署我们的SDK，我们的SDK和香港接入点实现长轮询，香港接入点和我们的上海主服务通过RPC调用，这样，对于每次海外供应商接口的调用，可以省去三次握手。</p>
+<h2 id="数据一致性"><a href="#数据一致性" class="headerlink" title="数据一致性"></a>数据一致性</h2><p>随着我们的数据体量越来越大，之前供应商主动推送＋平台定时拉去面临这严峻的考验，主要问题有</p>
 <ul>
 <li><p>供应商推送不及时</p>
 </li>
@@ -498,7 +514,7 @@
 </li>
 </ul>
 <p>通过以上优化，因为价格库存原因导致的订单失败大幅下降</p>
-<h3 id="供应商服务治理"><a href="#供应商服务治理" class="headerlink" title="供应商服务治理"></a>供应商服务治理</h3><p>前面说过，我们针对供应商服务采取了心跳机制来防止大规模的对接失败，但这样粒度太粗，还需要针对不同的case做特定的处理。同时，供应商的服务还需要供应商主动来做治理，我们可以采取监管，报警，惩罚的策略督促供应商。</p>
+<h2 id="供应商服务治理"><a href="#供应商服务治理" class="headerlink" title="供应商服务治理"></a>供应商服务治理</h2><p>前面说过，我们针对供应商服务采取了心跳机制来防止大规模的对接失败，但这样粒度太粗，还需要针对不同的case做特定的处理。同时，供应商的服务还需要供应商主动来做治理，我们可以采取监管，报警，惩罚的策略督促供应商。</p>
 <ul>
 <li><p>接口失败的status标准化，针对不同的status采取不同的处理方式</p>
 </li>
@@ -632,7 +648,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-count">6</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -655,7 +671,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">3</span>
+                      
+                    
+                    <span class="site-state-item-count">4</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -688,7 +706,13 @@
                     
                       
                     
-                    <span class="site-state-item-count">8</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -724,7 +748,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#从0到1"><span class="nav-number">2.</span> <span class="nav-text">从0到1</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#确立目标"><span class="nav-number">2.0.1.</span> <span class="nav-text">确立目标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#方案设计"><span class="nav-number">2.0.2.</span> <span class="nav-text">方案设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#WEB站"><span class="nav-number">2.0.3.</span> <span class="nav-text">WEB站</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#测试工具"><span class="nav-number">2.0.3.1.</span> <span class="nav-text">测试工具</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实时监控"><span class="nav-number">2.0.3.2.</span> <span class="nav-text">实时监控</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#沙箱环境"><span class="nav-number">2.0.4.</span> <span class="nav-text">沙箱环境</span></a></li></ol></li></ol><li class="nav-item nav-level-1"><a class="nav-link" href="#精益求精"><span class="nav-number">3.</span> <span class="nav-text">精益求精</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#网络"><span class="nav-number">3.0.1.</span> <span class="nav-text">网络</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#香港代理"><span class="nav-number">3.0.1.1.</span> <span class="nav-text">香港代理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#长链接"><span class="nav-number">3.0.1.2.</span> <span class="nav-text">长链接</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据一致性"><span class="nav-number">3.0.2.</span> <span class="nav-text">数据一致性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#供应商服务治理"><span class="nav-number">3.0.3.</span> <span class="nav-text">供应商服务治理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#星辰大海"><span class="nav-number">4.</span> <span class="nav-text">星辰大海</span></a></li></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#从0到1"><span class="nav-number">2.</span> <span class="nav-text">从0到1</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#确立目标"><span class="nav-number">2.1.</span> <span class="nav-text">确立目标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#方案设计"><span class="nav-number">2.2.</span> <span class="nav-text">方案设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WEB站"><span class="nav-number">2.3.</span> <span class="nav-text">WEB站</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#测试工具"><span class="nav-number">2.3.1.</span> <span class="nav-text">测试工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实时监控"><span class="nav-number">2.3.2.</span> <span class="nav-text">实时监控</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#沙箱环境"><span class="nav-number">2.4.</span> <span class="nav-text">沙箱环境</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#精益求精"><span class="nav-number">3.</span> <span class="nav-text">精益求精</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#网络"><span class="nav-number">3.1.</span> <span class="nav-text">网络</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#香港代理"><span class="nav-number">3.1.1.</span> <span class="nav-text">香港代理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#长链接"><span class="nav-number">3.1.2.</span> <span class="nav-text">长链接</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据一致性"><span class="nav-number">3.2.</span> <span class="nav-text">数据一致性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#供应商服务治理"><span class="nav-number">3.3.</span> <span class="nav-text">供应商服务治理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#星辰大海"><span class="nav-number">4.</span> <span class="nav-text">星辰大海</span></a></li></ol></div>
             
 
           </div>
