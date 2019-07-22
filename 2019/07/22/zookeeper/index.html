@@ -98,18 +98,18 @@
 
 
 
-  <meta name="description" content="集群搭建安装12[下载地址](dizhi &amp;quot;https://archive.apache.org/dist/zookeeper/&amp;quot;)解压 tar -zxvf  zookeeper-3.4.5.tar.gz 配置文件12345678cd conf/mv zoo_sample.cfg zoo.cfgdataDir=/dataLogDir=/server.1=168.61.17.19">
+  <meta name="description" content="集群搭建安装12[下载地址](&amp;quot;https://archive.apache.org/dist/zookeeper/&amp;quot;)解压 tar -zxvf  zookeeper-3.4.5.tar.gz 配置文件12345678cd conf/mv zoo_sample.cfg zoo.cfgdataDir=/dataLogDir=/server.1=168.61.17.197:2881">
 <meta name="keywords" content="中间件,zk,zookeeper">
 <meta property="og:type" content="article">
 <meta property="og:title" content="zookeeper原理与使用">
 <meta property="og:url" content="http://www.wangdongbing.com/2019/07/22/zookeeper/index.html">
 <meta property="og:site_name" content="好好学习,天天向上">
-<meta property="og:description" content="集群搭建安装12[下载地址](dizhi &amp;quot;https://archive.apache.org/dist/zookeeper/&amp;quot;)解压 tar -zxvf  zookeeper-3.4.5.tar.gz 配置文件12345678cd conf/mv zoo_sample.cfg zoo.cfgdataDir=/dataLogDir=/server.1=168.61.17.19">
+<meta property="og:description" content="集群搭建安装12[下载地址](&amp;quot;https://archive.apache.org/dist/zookeeper/&amp;quot;)解压 tar -zxvf  zookeeper-3.4.5.tar.gz 配置文件12345678cd conf/mv zoo_sample.cfg zoo.cfgdataDir=/dataLogDir=/server.1=168.61.17.197:2881">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-07-22T11:50:54.404Z">
+<meta property="og:updated_time" content="2019-07-22T11:53:20.971Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="zookeeper原理与使用">
-<meta name="twitter:description" content="集群搭建安装12[下载地址](dizhi &amp;quot;https://archive.apache.org/dist/zookeeper/&amp;quot;)解压 tar -zxvf  zookeeper-3.4.5.tar.gz 配置文件12345678cd conf/mv zoo_sample.cfg zoo.cfgdataDir=/dataLogDir=/server.1=168.61.17.19">
+<meta name="twitter:description" content="集群搭建安装12[下载地址](&amp;quot;https://archive.apache.org/dist/zookeeper/&amp;quot;)解压 tar -zxvf  zookeeper-3.4.5.tar.gz 配置文件12345678cd conf/mv zoo_sample.cfg zoo.cfgdataDir=/dataLogDir=/server.1=168.61.17.197:2881">
 
 
 
@@ -385,7 +385,7 @@
                 
               
 
-              <time title="创建时间：2019-07-22 19:47:57 / 修改时间：19:50:54" itemprop="dateCreated datePublished" datetime="2019-07-22T19:47:57+08:00">2019-07-22</time>
+              <time title="创建时间：2019-07-22 19:47:57 / 修改时间：19:53:20" itemprop="dateCreated datePublished" datetime="2019-07-22T19:47:57+08:00">2019-07-22</time>
             
 
             
@@ -442,7 +442,7 @@
       
 
       
-        <h2 id="集群搭建"><a href="#集群搭建" class="headerlink" title="集群搭建"></a>集群搭建</h2><p>安装<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[下载地址](dizhi &quot;https://archive.apache.org/dist/zookeeper/&quot;)</span><br><span class="line">解压 tar -zxvf  zookeeper-3.4.5.tar.gz</span><br></pre></td></tr></table></figure></p>
+        <h2 id="集群搭建"><a href="#集群搭建" class="headerlink" title="集群搭建"></a>集群搭建</h2><p>安装<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[下载地址](&quot;https://archive.apache.org/dist/zookeeper/&quot;)</span><br><span class="line">解压 tar -zxvf  zookeeper-3.4.5.tar.gz</span><br></pre></td></tr></table></figure></p>
 <p>配置文件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">cd conf/</span><br><span class="line">mv zoo_sample.cfg zoo.cfg</span><br><span class="line">dataDir=/</span><br><span class="line">dataLogDir=/</span><br><span class="line">server.1=168.61.17.197:2881:3888</span><br><span class="line">server.2=168.61.13.109:2881:3888</span><br><span class="line">server.3=168.61.13.110:2881:3888</span><br><span class="line">设置myid echo 1 &gt; /dataDir/myid</span><br></pre></td></tr></table></figure></p>
 <p>运行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">启动脚本 ./zkServer.sh start</span><br><span class="line">查看状态 ./zkServer.sh status</span><br></pre></td></tr></table></figure></p>
 <p>四字命令<br>echo ruok|nc 168.61.13.109 2181<br>echo conf|nc 168.61.13.109 2181<br>cons,crst,dump,mntr….</p>
