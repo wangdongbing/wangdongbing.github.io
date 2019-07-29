@@ -106,7 +106,7 @@
 <meta property="og:site_name" content="好好学习,天天向上">
 <meta property="og:description" content="JVM日常工具、命令 Linux解压/打包jar解压12jar  -xvf  xx.jar jar  -cvfM0  xx.jar  ./ 打包12unzip XXX.jar -d appjar cvfm0 MR-XDR-JMR-NEW.jar META-INF/MANIFEST.MF">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-07-16T09:11:39.860Z">
+<meta property="og:updated_time" content="2019-07-29T11:18:49.477Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="性能问题排查">
 <meta name="twitter:description" content="JVM日常工具、命令 Linux解压/打包jar解压12jar  -xvf  xx.jar jar  -cvfM0  xx.jar  ./ 打包12unzip XXX.jar -d appjar cvfm0 MR-XDR-JMR-NEW.jar META-INF/MANIFEST.MF">
@@ -402,7 +402,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-07-16 17:11:39" itemprop="dateModified" datetime="2019-07-16T17:11:39+08:00">2019-07-16</time>
+                <time title="修改时间：2019-07-29 19:18:49" itemprop="dateModified" datetime="2019-07-29T19:18:49+08:00">2019-07-29</time>
               
             
           </span>
@@ -459,7 +459,7 @@
 <p>打包<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">unzip XXX.jar -d app</span><br><span class="line">jar cvfm0 MR-XDR-JMR-NEW.jar META-INF/MANIFEST.MF</span><br></pre></td></tr></table></figure></p>
 <a id="more"></a>
 <h1 id="Java远程debug"><a href="#Java远程debug" class="headerlink" title="Java远程debug"></a>Java远程debug</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -Xdebug -Xrunjdwp:transport=dt_socket, server=y, suspend=n, address=8787 -jar xx.jar</span><br></pre></td></tr></table></figure>
-<h1 id="线程定位"><a href="#线程定位" class="headerlink" title="线程定位"></a>线程定位</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">top 获取当前CPU使用率</span><br><span class="line">top -Hp pid 获取当前进程中各个线程资源使用情况</span><br><span class="line">jstack pid 获取当前进程中线程堆栈</span><br><span class="line">将资源使用率较高的线程pid转为16进制，并且在线程堆栈中通过nid找到对应线程</span><br><span class="line">查看线程状态 RUNNABLE / WAITING / BLOCKED</span><br></pre></td></tr></table></figure>
+<h1 id="线程定位"><a href="#线程定位" class="headerlink" title="线程定位"></a>线程定位</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">top 获取当前CPU使用率</span><br><span class="line">top -Hp pid 获取当前进程中各个线程资源使用情况</span><br><span class="line">jstack pid 获取当前进程中线程堆栈</span><br><span class="line">printf &apos;%x\n&apos; pid  将资源使用率较高的线程pid转为16进制，并且在线程堆栈中通过nid找到对应线程</span><br><span class="line">jstack 1149 | grep 45a2 </span><br><span class="line">jstack pid &gt;stack.dump</span><br><span class="line">查看线程状态 RUNNABLE / WAITING / BLOCKED</span><br></pre></td></tr></table></figure>
 <h1 id="JVM内存查看"><a href="#JVM内存查看" class="headerlink" title="JVM内存查看"></a>JVM内存查看</h1><h2 id="系统内存相关"><a href="#系统内存相关" class="headerlink" title="系统内存相关"></a>系统内存相关</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cat /proc/meminfo 查看系统内存</span><br><span class="line">free -m  获取内存使用情况 （-K, -M ,-G）</span><br></pre></td></tr></table></figure>
 <p>total:总计物理内存的大小, used:已使用多大, free:可用有多少, Shared:多个进程共享的内存总额, Buffers/cached:磁盘缓存的大小。</p>
 <h2 id="JVM内存相关"><a href="#JVM内存相关" class="headerlink" title="JVM内存相关"></a>JVM内存相关</h2><p>jinfo pid / jinfo -flags pid 查看指定pid的所有JVM信息<br>jmap -heap pid 查看堆内存使用情况<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Xms/InitialHeapSize | 堆内存大小的初始值</span><br><span class="line">Xmx/MaxHeapSize | 堆内存大小的上限</span><br><span class="line">Xmn/MaxnewSize | 新生代可被分配的内存的最大上限</span><br><span class="line">XX:NewRatio | Yong和Old的比例|默认为2</span><br><span class="line">XX:SurvivorRatio | Survivor:Eden|默认为8</span><br></pre></td></tr></table></figure></p>
