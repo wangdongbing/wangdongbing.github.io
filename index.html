@@ -338,6 +338,370 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2019/08/14/databus安装教程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="WDB">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好学习,天天向上">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/08/14/databus安装教程/" class="post-title-link" itemprop="url">databus安装教程</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-08-14 16:25:44 / 修改时间：18:13:41" itemprop="dateCreated datePublished" datetime="2019-08-14T16:25:44+08:00">2019-08-14</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/数据同步/" itemprop="url" rel="index"><span itemprop="name">数据同步</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Databus是一个实时的、可靠的、支持事务的、保持一致性的数据变更抓取系统。 2011年在LinkedIn正式进入生产系统，2013年开源。<br>Databus通过挖掘数据库日志的方式，将数据库变更实时、可靠的从数据库拉取出来，业务可以通过定制化client实时获取变更。<br>Databus的传输层端到端延迟是微秒级的，每台服务器每秒可以处理数千次数据吞吐变更事件，同时还支持无限回溯能力和丰富的变更订阅功能。</p>
+<h2 id="准备mysql"><a href="#准备mysql" class="headerlink" title="准备mysql"></a>准备mysql</h2><p>1：首先确认据库是否开启binlog,如果binlog没有开启，可以通过set sql_log_bin=1命令来启用<br>2：配置数据库binlog_format=ROW， show variables like ‘binlog_format‘可查看日志格式， set globle binlog_format=ROW可修改，最好在my.cnf中修改<br>3：binlog_checksum设置为空，show global variables like ‘binlog_checksum’命令可查看，set binlog_checksum=none可设值，同样最好在my.cnf中修改<br>4：确认my.cnf中有server_id配置，设置之后需要重启</p>
+<h2 id="下载源码"><a href="#下载源码" class="headerlink" title="下载源码"></a>下载源码</h2><p>Databus官网下载源码，下载地址<a href="https://github.com/linkedin/databus.git" target="_blank" rel="noopener">https://github.com/linkedin/databus.git</a>.<br>我们需要用到databus目录下的databus2-example文件夹，在此基础上改造并运行，目录结构及介绍如下：<br>database：数据库模拟相关的脚本和工具<br>databus2-example-bst-producer-pkg：bootstrap producer的属性配置文件夹，包括bootstrap producer和log4j属性文件，build脚本以及bootstrap producer的启动和停止脚本。<br>databus2-example-client-pkg：client的属性配置文件夹，包括各种属性文件和启动和停止脚本。<br>databus2-example-client：client源代码，包含启动主类和消费者代码逻辑。<br>databus2-example-relay-pkg：relay的属性配置文件夹，包含监控的表的source信息和Avro schema。<br>databus2-example-relay：relay的启动主类。<br>schemas_registry：存放表的avsc文件。</p>
+<h2 id="Relay端配置"><a href="#Relay端配置" class="headerlink" title="Relay端配置"></a>Relay端配置</h2><p>Relay属性文件：databus2-example-relay-pkg/conf/relay-or-person.properties为relay配置，包括端口号，buffer存储策略，maxScn存放地址等信息，重点关注maxScn的存放地址，relay启动之后会在改目录下创建MaxScn_Person文件，需要确保有权限写入<br>databus.relay.dataSources.sequenceNumbersHandler.file.scnDir=/tmp/maxScn<br>被监控表配置文件：databus2-example-relay-pkg/conf/sources-or-person.json<br>其中URI format:mysql://username/password@mysql_host[:mysql_port]/mysql_serverid/binlog_prefix，注意%2F为转义字符，用户名为root,数据库密码为root。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"name"</span> : <span class="string">"person"</span>,</span><br><span class="line">    <span class="attr">"id"</span>  : <span class="number">1</span>,</span><br><span class="line">    <span class="attr">"uri"</span> : <span class="string">"mysql://root%2Froot@localhost:3306/1/mysql-bin"</span>,</span><br><span class="line">    <span class="attr">"slowSourceQueryThreshold"</span> : <span class="number">2000</span>,</span><br><span class="line">    <span class="attr">"sources"</span> :</span><br><span class="line">    [</span><br><span class="line">        &#123;</span><br><span class="line">        <span class="attr">"id"</span> : <span class="number">40</span>,</span><br><span class="line">        <span class="attr">"name"</span> : <span class="string">"com.linkedin.events.example.or_test.Person"</span>,</span><br><span class="line">        <span class="attr">"uri"</span>: <span class="string">"or_test.person"</span>,</span><br><span class="line">        <span class="attr">"partitionFunction"</span> : <span class="string">"constant:1"</span></span><br><span class="line">         &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br><span class="line">``` </span><br><span class="line">databus2-example-relay-pkg/schemas_registry/下定义person的Avro schema文件 com.linkedin.events.example.or_test.Person.1.avsc，其中1表示版本(Databus目前没有针对mysql提供生成Avro schema文件的工具，所以只能手工编写)具体内容如下所示：</span><br><span class="line"></span><br><span class="line">``` json</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"name"</span> : <span class="string">"Person_V1"</span>,</span><br><span class="line">  <span class="attr">"doc"</span> : <span class="string">"Auto-generated Avro schema for sy$person. Generated at Dec 04, 2012 05:07:05 PM PST"</span>,</span><br><span class="line">  <span class="attr">"type"</span> : <span class="string">"record"</span>,</span><br><span class="line">  <span class="attr">"meta"</span> : <span class="string">"dbFieldName=person;pk=id;"</span>,</span><br><span class="line">  <span class="attr">"namespace"</span> : <span class="string">"com.linkedin.events.example.or_test"</span>,</span><br><span class="line">  <span class="attr">"fields"</span> : [ &#123;</span><br><span class="line">    <span class="attr">"name"</span> : <span class="string">"id"</span>,</span><br><span class="line">    <span class="attr">"type"</span> : [ <span class="string">"long"</span>, <span class="string">"null"</span> ],</span><br><span class="line">    <span class="attr">"meta"</span> : <span class="string">"dbFieldName=ID;dbFieldPosition=0;"</span></span><br><span class="line">  &#125;, &#123;</span><br><span class="line">    <span class="attr">"name"</span> : <span class="string">"firstName"</span>,</span><br><span class="line">    <span class="attr">"type"</span> : [ <span class="string">"string"</span>, <span class="string">"null"</span> ],</span><br><span class="line">    <span class="attr">"meta"</span> : <span class="string">"dbFieldName=FIRST_NAME;dbFieldPosition=1;"</span></span><br><span class="line">  &#125;, &#123;</span><br><span class="line">    <span class="attr">"name"</span> : <span class="string">"lastName"</span>,</span><br><span class="line">    <span class="attr">"type"</span> : [ <span class="string">"string"</span>, <span class="string">"null"</span> ],</span><br><span class="line">    <span class="attr">"meta"</span> : <span class="string">"dbFieldName=LAST_NAME;dbFieldPosition=2;"</span></span><br><span class="line">  &#125;, &#123;</span><br><span class="line">    <span class="attr">"name"</span> : <span class="string">"birthDate"</span>,</span><br><span class="line">    <span class="attr">"type"</span> : [ <span class="string">"long"</span>, <span class="string">"null"</span> ],</span><br><span class="line">    <span class="attr">"meta"</span> : <span class="string">"dbFieldName=BIRTH_DATE;dbFieldPosition=3;"</span></span><br><span class="line">  &#125;, &#123;</span><br><span class="line">    <span class="attr">"name"</span> : <span class="string">"deleted"</span>,</span><br><span class="line">    <span class="attr">"type"</span> : [ <span class="string">"string"</span>, <span class="string">"null"</span> ],</span><br><span class="line">    <span class="attr">"meta"</span> : <span class="string">"dbFieldName=DELETED;dbFieldPosition=4;"</span></span><br><span class="line">  &#125; ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注册Avro schema到index.schemas_registry文件,databus2-example-relay-pkg/schemas_registry/index.schemas_registry文件中添加行com.linkedin.events.example.or_test.Person.1.avsc ，每定义一个Avro schema都需要添加进去，relay运行时会到此文件中查找表对应的定义的Avro schema。</p>
+<h2 id="Client端配置"><a href="#Client端配置" class="headerlink" title="Client端配置"></a>Client端配置</h2><p>Client属性文件：databus2-example-client-pkg/conf/client-person.properties的内容如下配置，包括端口号，buffer存储策略，checkpoint持久化等信息：</p>
+<p>databus2-example-client/src/main/java下的PersonConsumer类是消费逻辑回调代码，主要是取出每一个event后依次打印每个字段的名值对，主要代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> ConsumerCallbackResult <span class="title">processEvent</span><span class="params">(DbusEvent event, DbusEventDecoder eventDecoder)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    GenericRecord decodedEvent = eventDecoder.getGenericRecord(event, <span class="keyword">null</span>);</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      Utf8 firstName = (Utf8)decodedEvent.get(<span class="string">"firstName"</span>);</span><br><span class="line">      Utf8 lastName = (Utf8)decodedEvent.get(<span class="string">"lastName"</span>);</span><br><span class="line">      Long birthDate = (Long)decodedEvent.get(<span class="string">"birthDate"</span>);</span><br><span class="line">      Utf8 deleted = (Utf8)decodedEvent.get(<span class="string">"deleted"</span>);</span><br><span class="line">      LOG.info(<span class="string">"firstName: "</span> + firstName.toString() +</span><br><span class="line">                 <span class="string">", lastName: "</span> + lastName.toString() +</span><br><span class="line">                 <span class="string">", birthDate: "</span> + birthDate +</span><br><span class="line">                 <span class="string">", deleted: "</span> + deleted.toString());</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">      LOG.error(<span class="string">"error decoding event "</span>, e);</span><br><span class="line">      <span class="keyword">return</span> ConsumerCallbackResult.ERROR;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> ConsumerCallbackResult.SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>databus2-example-client/src/main/java下的PersonClient类是relay的启动主类，主要是设置启动Client的配置信息，将消费者实例注册到监听器中，后续可对其进行回调，主要代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    DatabusHttpClientImpl.Config configBuilder = <span class="keyword">new</span> DatabusHttpClientImpl.Config();</span><br><span class="line">    <span class="comment">//Try to connect to a relay on localhost</span></span><br><span class="line">    configBuilder.getRuntime().getRelay(<span class="string">"1"</span>).setHost(<span class="string">"localhost"</span>);</span><br><span class="line">    configBuilder.getRuntime().getRelay(<span class="string">"1"</span>).setPort(<span class="number">11115</span>);</span><br><span class="line">    configBuilder.getRuntime().getRelay(<span class="string">"1"</span>).setSources(PERSON_SOURCE);</span><br><span class="line">    <span class="comment">//Instantiate a client using command-line parameters if any</span></span><br><span class="line">    DatabusHttpClientImpl client = DatabusHttpClientImpl.createFromCli(args, configBuilder);</span><br><span class="line">    <span class="comment">//register callbacks</span></span><br><span class="line">    PersonConsumer personConsumer = <span class="keyword">new</span> PersonConsumer();</span><br><span class="line">    client.registerDatabusStreamListener(personConsumer, <span class="keyword">null</span>, PERSON_SOURCE);</span><br><span class="line">    client.registerDatabusBootstrapListener(personConsumer, <span class="keyword">null</span>, PERSON_SOURCE);</span><br><span class="line">    <span class="comment">//fire off the Databus client</span></span><br><span class="line">    client.startAndBlock();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="build-启动-测试"><a href="#build-启动-测试" class="headerlink" title="build-启动-测试"></a>build-启动-测试</h2><p>Build:Databus采用gradle进行编译，所以需要安装gradle环境，安装安成后进入databus根目录执行命令gradle -Dopen_source=true assemble即可完成build,成功后在databus根目录下生成名为build的文件夹</p>
+<h3 id="启动Relay"><a href="#启动Relay" class="headerlink" title="启动Relay:"></a>启动Relay:</h3><p>cd build/databus2-example-relay-pkg/distributions<br>tar -zxvf databus2-example-relay-pkg.tar.gz解压<br>执行启动脚本 ./bin/start-example-relay.sh or_person -Y ./conf/sources-or-person.json<br>执行命令 curl -s <a href="http://localhost:11115/sources返回如下内容说明启动成功：" target="_blank" rel="noopener">http://localhost:11115/sources返回如下内容说明启动成功：</a> </p>
+<h3 id="启动Client"><a href="#启动Client" class="headerlink" title="启动Client:"></a>启动Client:</h3><p>cd build/databus2-example-client-pkg/distributions<br>tar -zxvf databus2-example-client-pkg.tar.gz解压<br>执行启动脚本 ./bin/start-example-client.sh person<br>执行命令 curl <a href="http://localhost:11115/relayStats/outbound/http/clients返回如下内容说明启动成功：" target="_blank" rel="noopener">http://localhost:11115/relayStats/outbound/http/clients返回如下内容说明启动成功：</a> </p>
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><p>Relay和Client启动成功后，就已经开始对person表进行数据变更捕获了，现在向person表插入一条如下记录,databus2-example-relay-pkg/distributions/logs下的relay.log记录如下：<br><img src="/2019/08/14/databus安装教程/databus-relay.png" alt="avatar"></p>
+<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>Could not find first log file name in binary log index file</p>
+<p>1: 首先检查binlog是否存在，确认my.cnf中binlog目录，如果没有重新添加目录，重启mysql<br>2：检查当前用户是否有权限读取binlog，binlog的读取需要赋权,具体如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt;CREATE USER &apos;user&apos;@ &apos;X.X.X.X&apos; IDENTIFIED BY &apos;password&apos;;</span><br><span class="line">mysql&gt;GRANT REPLICATION SLAVE ON *.* TO &apos;user&apos;@&apos;X.X.X.X&apos; IDENTIFIED BY &apos;password&apos;;</span><br></pre></td></tr></table></figure></p>
+<p>3: 检查databus-relay-conf中配置的binlog前缀是否可mysql中my.cnf中binlog前缀一致，例如两者都应该为mysql-bin<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">relay-conf: &quot;uri&quot; : &quot;mysql://root%2Froot@127.0.0.1:3306/1/mysql-bin&quot;</span><br><span class="line">my.cnf : log_bin=/app/mysql/datalog/mysql-bin</span><br></pre></td></tr></table></figure></p>
+<p>3: 如果是主从复制遇到这个问题，一般是由于master重启之后导致两边binlog-index不同步，操作步骤如下</p>
+<pre><code class="mysql">slave执行 ：mysql&gt; slave stop;
+master执行：mysql&gt;SHOW MASTER STATUS;
+           mysql&gt; flush logs;
+slave执行 ：mysql&gt; CHANGE MASTER TO MASTER_LOG_FILE=&apos;mysqld-bin.000011&apos;,MASTER_LOG_POS=106;
+           mysql&gt; slave start;
+           mysql&gt; show slave status\G;
+
+</code></pre>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2019/08/14/mysql安装教程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="WDB">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好学习,天天向上">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/08/14/mysql安装教程/" class="post-title-link" itemprop="url">mysql安装教程</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-08-14 16:19:56 / 修改时间：18:12:55" itemprop="dateCreated datePublished" datetime="2019-08-14T16:19:56+08:00">2019-08-14</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/数据同步/" itemprop="url" rel="index"><span itemprop="name">数据同步</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="下载安装包"><a href="#下载安装包" class="headerlink" title="下载安装包"></a>下载安装包</h2><p>wget <a href="https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.22-linux-glibc2.12-x86_64.tar.gz" target="_blank" rel="noopener">https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.22-linux-glibc2.12-x86_64.tar.gz</a></p>
+<h2 id="安装到-usr-local-mysql下"><a href="#安装到-usr-local-mysql下" class="headerlink" title="安装到/usr/local/mysql下"></a>安装到/usr/local/mysql下</h2><p>tar -xvf mysql-5.7.22-linux-glibc2.12-x86_64.tar.gz<br>mv mysql-5.7.22-linux-glibc2.12-x86_64 /usr/local/</p>
+<h2 id="新建mysql用户、mysql用户组、赋权"><a href="#新建mysql用户、mysql用户组、赋权" class="headerlink" title="新建mysql用户、mysql用户组、赋权"></a>新建mysql用户、mysql用户组、赋权</h2><p>groupadd mysql<br>useradd mysql -g mysql<br>chown -R mysql.mysql /usr/local/mysql</p>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>/usr/local/mysql/bin/mysql_install_db –user=mysql –basedir=/usr/local/mysql/ –datadir=/usr/local/mysql/data<br>/usr/local/mysql/bin/mysqld –user=mysql –basedir=/usr/local/mysql/ –datadir=/usr/local/mysql/data –initialize</p>
+<h2 id="修改my-cnf"><a href="#修改my-cnf" class="headerlink" title="修改my.cnf"></a>修改my.cnf</h2><p>user=mysql<br>port=3306<br>character-set-server=utf8<br>symbolic-links=0<br>binlog-format=Row  修改binlog格式<br>server-id=1  指定服务ID<br>log_bin=/app/mysql/datalog/mysql-bin  指定binlog文件前缀格式<br>binlog_checksum=NONE 关闭mysql5.6之后binlog解析crc32校验，不然可能导致存库解析binlog失败， 报错示例： Slave can not handle replication events with the checksum that maste<br>skip-grant-tables 取消密码验证</p>
+<h2 id="开机服务"><a href="#开机服务" class="headerlink" title="开机服务"></a>开机服务</h2><p>cp /usr/local/mysql/support-files/mysql.server /etc/init.d/mysql<br>chkconfig mysql on<br>service mysql start</p>
+<h2 id="密码"><a href="#密码" class="headerlink" title="密码"></a>密码</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/mysql/bin/mysql -u root -p</span><br><span class="line">&gt;&gt;use mysql;</span><br><span class="line">&gt;&gt;update user set authentication_string=password(&apos;你的密码&apos;) where user=&apos;root&apos;;</span><br><span class="line">&gt;&gt;flush privileges;</span><br><span class="line">&gt;&gt;exit;</span><br></pre></td></tr></table></figure>
+<p>删除my.cnf中的skip-grant-tables并修改密码</p>
+<pre><code class="mysql">/usr/local/mysql/bin/mysql -u root -p
+&gt;&gt;ALTER USER &apos;root&apos;@&apos;localhost&apos; IDENTIFIED BY &apos;修改后的密码&apos;;
+&gt;&gt;exit;
+</code></pre>
+<h2 id="远程连接"><a href="#远程连接" class="headerlink" title="远程连接"></a>远程连接</h2><pre><code class="mysql">/usr/local/mysql/bin/mysql -u root -p
+&gt;&gt;use mysql;
+&gt;&gt;update user set host=&apos;%&apos; where user = &apos;root&apos;;
+&gt;&gt;flush privileges;
+</code></pre>
+<p>安装过程中报错，直接查看mysql日志，很多是errcode13，代表权限问题，mysql用户是否对数据库目录内的所有文件具有写的权限</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2019/07/22/zookeeper/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1720,369 +2084,13 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2019/03/14/直连系统实践/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="WDB">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="好好学习,天天向上">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/03/14/直连系统实践/" class="post-title-link" itemprop="url">美团境外度假直连系统实践</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-03-14 11:28:14" itemprop="dateCreated datePublished" datetime="2019-03-14T11:28:14+08:00">2019-03-14</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2019-06-14 23:53:45" itemprop="dateModified" datetime="2019-06-14T23:53:45+08:00">2019-06-14</time>
-              
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/项目实践/" itemprop="url" rel="index"><span itemprop="name">项目实践</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>美团点评-境外度假事业部是酒旅事业群所属的四个事业部之一，主要业务是运营境外旅游产品，度假产品，购物优惠券，境外POI信息，对于境外旅游这种业务形态，美团点评是第一次尝试，我们从15年底开始建设整个旅游的供应链系统和交易系统，和竞对相比，我们起步晚，所以，我们必须快速的建立起来整个体系，在这个体系中，直连系统承担了上接供应商商品，下接订单的角色，实现链路的闭环。</p>
-<p>本文将从直连系统建设当中遇到的问题和解决方案和大家讨论。<br></p>
-          <!--noindex-->
-          
-            <div class="post-button text-center">
-              <a class="btn" href="/2019/03/14/直连系统实践/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2019/03/08/hello-world/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="WDB">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="好好学习,天天向上">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/03/08/hello-world/" class="post-title-link" itemprop="url">Hello World</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-03-08 11:13:39" itemprop="dateCreated datePublished" datetime="2019-03-08T11:13:39+08:00">2019-03-08</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2019-06-19 17:15:07" itemprop="dateModified" datetime="2019-06-19T17:15:07+08:00">2019-06-19</time>
-              
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/搭建博客/" itemprop="url" rel="index"><span itemprop="name">搭建博客</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-          
-            <div class="post-button text-center">
-              <a class="btn" href="/2019/03/08/hello-world/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+  </nav>
+
 
 
           </div>
@@ -2122,7 +2130,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-count">12</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -2155,7 +2163,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">8</span>
+                      
+                    
+                    <span class="site-state-item-count">9</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -2214,7 +2224,15 @@
                     
                       
                     
-                    <span class="site-state-item-count">21</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>

@@ -98,28 +98,25 @@
 
 
 
-  <meta name="description" content="springboot中main方法执行完为什么不退出首先明白一个概念，守护线程和用户线程，Daemon Thread和User Thread  定义：守护线程，在没有用户线程可服务时会自动离开。 优先级：守护线程的优先级较低，用于为系统中的其它对象和线程提供服务。在main方法中，如果有非守护线程，那么main方法执行完之后，JVM不会立即退出，会等到所有的非守护线程执行完之后才退出，下面是一个新">
-<meta name="keywords" content="启动,springboot,线程">
+  <meta name="description" content="下载安装包wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.22-linux-glibc2.12-x86_64.tar.gz 安装到/usr/local/mysql下tar -xvf mysql-5.7.22-linux-glibc2.12-x86_64.tar.gzmv mysql-5.7.22-linux-glibc2.1">
+<meta name="keywords" content="binlog,教程,mysql">
 <meta property="og:type" content="article">
-<meta property="og:title" content="日常疑问">
-<meta property="og:url" content="http://www.wangdongbing.com/2019/07/22/线程/index.html">
+<meta property="og:title" content="mysql安装教程">
+<meta property="og:url" content="http://www.wangdongbing.com/2019/08/14/mysql安装教程/index.html">
 <meta property="og:site_name" content="好好学习,天天向上">
-<meta property="og:description" content="springboot中main方法执行完为什么不退出首先明白一个概念，守护线程和用户线程，Daemon Thread和User Thread  定义：守护线程，在没有用户线程可服务时会自动离开。 优先级：守护线程的优先级较低，用于为系统中的其它对象和线程提供服务。在main方法中，如果有非守护线程，那么main方法执行完之后，JVM不会立即退出，会等到所有的非守护线程执行完之后才退出，下面是一个新">
+<meta property="og:description" content="下载安装包wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.22-linux-glibc2.12-x86_64.tar.gz 安装到/usr/local/mysql下tar -xvf mysql-5.7.22-linux-glibc2.12-x86_64.tar.gzmv mysql-5.7.22-linux-glibc2.1">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://www.wangdongbing.com/2019/07/22/线程/jprofiler2.PNG">
-<meta property="og:image" content="http://www.wangdongbing.com/2019/07/22/线程/jprofiler1.PNG">
-<meta property="og:updated_time" content="2019-08-14T02:07:17.116Z">
+<meta property="og:updated_time" content="2019-08-14T10:12:55.728Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="日常疑问">
-<meta name="twitter:description" content="springboot中main方法执行完为什么不退出首先明白一个概念，守护线程和用户线程，Daemon Thread和User Thread  定义：守护线程，在没有用户线程可服务时会自动离开。 优先级：守护线程的优先级较低，用于为系统中的其它对象和线程提供服务。在main方法中，如果有非守护线程，那么main方法执行完之后，JVM不会立即退出，会等到所有的非守护线程执行完之后才退出，下面是一个新">
-<meta name="twitter:image" content="http://www.wangdongbing.com/2019/07/22/线程/jprofiler2.PNG">
+<meta name="twitter:title" content="mysql安装教程">
+<meta name="twitter:description" content="下载安装包wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.22-linux-glibc2.12-x86_64.tar.gz 安装到/usr/local/mysql下tar -xvf mysql-5.7.22-linux-glibc2.12-x86_64.tar.gzmv mysql-5.7.22-linux-glibc2.1">
 
 
 
 
 
 
-  <link rel="canonical" href="http://www.wangdongbing.com/2019/07/22/线程/">
+  <link rel="canonical" href="http://www.wangdongbing.com/2019/08/14/mysql安装教程/">
 
 
 
@@ -129,7 +126,7 @@
   };
 </script>
 
-  <title>日常疑问 | 好好学习,天天向上</title>
+  <title>mysql安装教程 | 好好学习,天天向上</title>
   
 
 
@@ -345,7 +342,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2019/07/22/线程/">
+    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2019/08/14/mysql安装教程/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="WDB">
@@ -362,7 +359,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">日常疑问
+          <h1 class="post-title" itemprop="name headline">mysql安装教程
 
               
             
@@ -388,24 +385,12 @@
                 
               
 
-              <time title="创建时间：2019-07-22 19:47:35" itemprop="dateCreated datePublished" datetime="2019-07-22T19:47:35+08:00">2019-07-22</time>
+              <time title="创建时间：2019-08-14 16:19:56 / 修改时间：18:12:55" itemprop="dateCreated datePublished" datetime="2019-08-14T16:19:56+08:00">2019-08-14</time>
             
 
             
               
 
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2019-08-14 10:07:17" itemprop="dateModified" datetime="2019-08-14T10:07:17+08:00">2019-08-14</time>
               
             
           </span>
@@ -422,7 +407,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/日常问题/" itemprop="url" rel="index"><span itemprop="name">日常问题</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/数据同步/" itemprop="url" rel="index"><span itemprop="name">数据同步</span></a></span>
 
                 
                 
@@ -457,12 +442,24 @@
       
 
       
-        <h2 id="springboot中main方法执行完为什么不退出"><a href="#springboot中main方法执行完为什么不退出" class="headerlink" title="springboot中main方法执行完为什么不退出"></a>springboot中main方法执行完为什么不退出</h2><p>首先明白一个概念，守护线程和用户线程，Daemon Thread和User Thread</p>
-<ul>
-<li>定义：守护线程，在没有用户线程可服务时会自动离开。</li>
-<li>优先级：守护线程的优先级较低，用于为系统中的其它对象和线程提供服务。<br>在main方法中，如果有非守护线程，那么main方法执行完之后，JVM不会立即退出，会等到所有的非守护线程执行完之后才退出，下面是一个新建的springboot项目中，启动后，通过jprofiler查看到的线程情况<br><img src="/2019/07/22/线程/jprofiler2.PNG" alt="bp"><br>从上图可以看出，main线程结束之后，其他子线程依旧在运行，在看下dump可以看出，main2线程在sleep<br><img src="/2019/07/22/线程/jprofiler1.PNG" alt="blockchain" title="jprofiler"><br>通过dump信息，追踪到代码中，可以看出main2的sleep是由于dubbo的TpsLimitFilter类启动了new Thread，并且sleep<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">        (<span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">while</span>(<span class="keyword">true</span>) &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">1000L</span>);</span><br><span class="line">                        <span class="keyword">synchronized</span>(TpsLimitFilter.notifyObject) &#123;</span><br><span class="line">                            TpsLimitFilter.notifyObject.notifyAll();</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException var4) &#123;</span><br><span class="line">                        var4.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)).start();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
+        <h2 id="下载安装包"><a href="#下载安装包" class="headerlink" title="下载安装包"></a>下载安装包</h2><p>wget <a href="https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.22-linux-glibc2.12-x86_64.tar.gz" target="_blank" rel="noopener">https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.22-linux-glibc2.12-x86_64.tar.gz</a></p>
+<h2 id="安装到-usr-local-mysql下"><a href="#安装到-usr-local-mysql下" class="headerlink" title="安装到/usr/local/mysql下"></a>安装到/usr/local/mysql下</h2><p>tar -xvf mysql-5.7.22-linux-glibc2.12-x86_64.tar.gz<br>mv mysql-5.7.22-linux-glibc2.12-x86_64 /usr/local/</p>
+<h2 id="新建mysql用户、mysql用户组、赋权"><a href="#新建mysql用户、mysql用户组、赋权" class="headerlink" title="新建mysql用户、mysql用户组、赋权"></a>新建mysql用户、mysql用户组、赋权</h2><p>groupadd mysql<br>useradd mysql -g mysql<br>chown -R mysql.mysql /usr/local/mysql</p>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>/usr/local/mysql/bin/mysql_install_db –user=mysql –basedir=/usr/local/mysql/ –datadir=/usr/local/mysql/data<br>/usr/local/mysql/bin/mysqld –user=mysql –basedir=/usr/local/mysql/ –datadir=/usr/local/mysql/data –initialize</p>
+<h2 id="修改my-cnf"><a href="#修改my-cnf" class="headerlink" title="修改my.cnf"></a>修改my.cnf</h2><p>user=mysql<br>port=3306<br>character-set-server=utf8<br>symbolic-links=0<br>binlog-format=Row  修改binlog格式<br>server-id=1  指定服务ID<br>log_bin=/app/mysql/datalog/mysql-bin  指定binlog文件前缀格式<br>binlog_checksum=NONE 关闭mysql5.6之后binlog解析crc32校验，不然可能导致存库解析binlog失败， 报错示例： Slave can not handle replication events with the checksum that maste<br>skip-grant-tables 取消密码验证</p>
+<h2 id="开机服务"><a href="#开机服务" class="headerlink" title="开机服务"></a>开机服务</h2><p>cp /usr/local/mysql/support-files/mysql.server /etc/init.d/mysql<br>chkconfig mysql on<br>service mysql start</p>
+<h2 id="密码"><a href="#密码" class="headerlink" title="密码"></a>密码</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/mysql/bin/mysql -u root -p</span><br><span class="line">&gt;&gt;use mysql;</span><br><span class="line">&gt;&gt;update user set authentication_string=password(&apos;你的密码&apos;) where user=&apos;root&apos;;</span><br><span class="line">&gt;&gt;flush privileges;</span><br><span class="line">&gt;&gt;exit;</span><br></pre></td></tr></table></figure>
+<p>删除my.cnf中的skip-grant-tables并修改密码</p>
+<pre><code class="mysql">/usr/local/mysql/bin/mysql -u root -p
+&gt;&gt;ALTER USER &apos;root&apos;@&apos;localhost&apos; IDENTIFIED BY &apos;修改后的密码&apos;;
+&gt;&gt;exit;
+</code></pre>
+<h2 id="远程连接"><a href="#远程连接" class="headerlink" title="远程连接"></a>远程连接</h2><pre><code class="mysql">/usr/local/mysql/bin/mysql -u root -p
+&gt;&gt;use mysql;
+&gt;&gt;update user set host=&apos;%&apos; where user = &apos;root&apos;;
+&gt;&gt;flush privileges;
+</code></pre>
+<p>安装过程中报错，直接查看mysql日志，很多是errcode13，代表权限问题，mysql用户是否对数据库目录内的所有文件具有写的权限</p>
 
       
     </div>
@@ -486,11 +483,11 @@
       
         <div class="post-tags">
           
-            <a href="/tags/启动/" rel="tag"># 启动</a>
+            <a href="/tags/binlog/" rel="tag"># binlog</a>
           
-            <a href="/tags/springboot/" rel="tag"># springboot</a>
+            <a href="/tags/教程/" rel="tag"># 教程</a>
           
-            <a href="/tags/线程/" rel="tag"># 线程</a>
+            <a href="/tags/mysql/" rel="tag"># mysql</a>
           
         </div>
       
@@ -503,8 +500,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/07/11/LRU/" rel="next" title="常见LRU算法">
-                <i class="fa fa-chevron-left"></i> 常见LRU算法
+              <a href="/2019/07/22/zookeeper/" rel="next" title="zookeeper原理与使用">
+                <i class="fa fa-chevron-left"></i> zookeeper原理与使用
               </a>
             
           </div>
@@ -513,8 +510,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/07/22/zookeeper/" rel="prev" title="zookeeper原理与使用">
-                zookeeper原理与使用 <i class="fa fa-chevron-right"></i>
+              <a href="/2019/08/14/databus安装教程/" rel="prev" title="databus安装教程">
+                databus安装教程 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -722,7 +719,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#springboot中main方法执行完为什么不退出"><span class="nav-number">1.</span> <span class="nav-text">springboot中main方法执行完为什么不退出</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#下载安装包"><span class="nav-number">1.</span> <span class="nav-text">下载安装包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装到-usr-local-mysql下"><span class="nav-number">2.</span> <span class="nav-text">安装到/usr/local/mysql下</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#新建mysql用户、mysql用户组、赋权"><span class="nav-number">3.</span> <span class="nav-text">新建mysql用户、mysql用户组、赋权</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置"><span class="nav-number">4.</span> <span class="nav-text">配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改my-cnf"><span class="nav-number">5.</span> <span class="nav-text">修改my.cnf</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开机服务"><span class="nav-number">6.</span> <span class="nav-text">开机服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#密码"><span class="nav-number">7.</span> <span class="nav-text">密码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#远程连接"><span class="nav-number">8.</span> <span class="nav-text">远程连接</span></a></li></ol></div>
             
 
           </div>
