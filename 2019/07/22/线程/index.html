@@ -106,13 +106,13 @@
 <meta property="og:site_name" content="好好学习,天天向上">
 <meta property="og:description" content="springboot中main方法执行完为什么不退出首先明白一个概念，守护线程和用户线程，Daemon Thread和User Thread  定义：守护线程，在没有用户线程可服务时会自动离开。 优先级：守护线程的优先级较低，用于为系统中的其它对象和线程提供服务。在main方法中，如果有非守护线程，那么main方法执行完之后，JVM不会立即退出，会等到所有的非守护线程执行完之后才退出，下面是一个新">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://www.wangdongbing.com/2019/07/22/线程/pic/G1-1.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2019/07/22/线程/G1-1.png">
 <meta property="og:image" content="http://chuantu.xyz/t6/702/1563795532x1033347913.png">
-<meta property="og:updated_time" content="2019-08-14T01:23:53.043Z">
+<meta property="og:updated_time" content="2019-08-14T01:47:06.829Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="日常疑问">
 <meta name="twitter:description" content="springboot中main方法执行完为什么不退出首先明白一个概念，守护线程和用户线程，Daemon Thread和User Thread  定义：守护线程，在没有用户线程可服务时会自动离开。 优先级：守护线程的优先级较低，用于为系统中的其它对象和线程提供服务。在main方法中，如果有非守护线程，那么main方法执行完之后，JVM不会立即退出，会等到所有的非守护线程执行完之后才退出，下面是一个新">
-<meta name="twitter:image" content="http://www.wangdongbing.com/2019/07/22/线程/pic/G1-1.png">
+<meta name="twitter:image" content="http://www.wangdongbing.com/2019/07/22/线程/G1-1.png">
 
 
 
@@ -405,7 +405,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-08-14 09:23:53" itemprop="dateModified" datetime="2019-08-14T09:23:53+08:00">2019-08-14</time>
+                <time title="修改时间：2019-08-14 09:47:06" itemprop="dateModified" datetime="2019-08-14T09:47:06+08:00">2019-08-14</time>
               
             
           </span>
@@ -460,7 +460,7 @@
         <h2 id="springboot中main方法执行完为什么不退出"><a href="#springboot中main方法执行完为什么不退出" class="headerlink" title="springboot中main方法执行完为什么不退出"></a>springboot中main方法执行完为什么不退出</h2><p>首先明白一个概念，守护线程和用户线程，Daemon Thread和User Thread</p>
 <ul>
 <li>定义：守护线程，在没有用户线程可服务时会自动离开。</li>
-<li>优先级：守护线程的优先级较低，用于为系统中的其它对象和线程提供服务。<br>在main方法中，如果有非守护线程，那么main方法执行完之后，JVM不会立即退出，会等到所有的非守护线程执行完之后才退出，下面是一个新建的springboot项目中，启动后，通过jprofiler查看到的线程情况<br><img src="pic/G1-1.png" alt="bp" title="jprofiler"><br>从上图可以看出，main线程结束之后，其他子线程依旧在运行，在看下dump可以看出，main2线程在sleep<br><img src="http://chuantu.xyz/t6/702/1563795532x1033347913.png" alt="blockchain" title="jprofiler"><br>通过dump信息，追踪到代码中，可以看出main2的sleep是由于dubbo的TpsLimitFilter类启动了new Thread，并且sleep<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">        (<span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">while</span>(<span class="keyword">true</span>) &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">1000L</span>);</span><br><span class="line">                        <span class="keyword">synchronized</span>(TpsLimitFilter.notifyObject) &#123;</span><br><span class="line">                            TpsLimitFilter.notifyObject.notifyAll();</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException var4) &#123;</span><br><span class="line">                        var4.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)).start();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<li>优先级：守护线程的优先级较低，用于为系统中的其它对象和线程提供服务。<br>在main方法中，如果有非守护线程，那么main方法执行完之后，JVM不会立即退出，会等到所有的非守护线程执行完之后才退出，下面是一个新建的springboot项目中，启动后，通过jprofiler查看到的线程情况<br><img src="/2019/07/22/线程/G1-1.png" alt="bp"><br>从上图可以看出，main线程结束之后，其他子线程依旧在运行，在看下dump可以看出，main2线程在sleep<br><img src="http://chuantu.xyz/t6/702/1563795532x1033347913.png" alt="blockchain" title="jprofiler"><br>通过dump信息，追踪到代码中，可以看出main2的sleep是由于dubbo的TpsLimitFilter类启动了new Thread，并且sleep<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">        (<span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">while</span>(<span class="keyword">true</span>) &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">1000L</span>);</span><br><span class="line">                        <span class="keyword">synchronized</span>(TpsLimitFilter.notifyObject) &#123;</span><br><span class="line">                            TpsLimitFilter.notifyObject.notifyAll();</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException var4) &#123;</span><br><span class="line">                        var4.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)).start();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
 
@@ -584,7 +584,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-count">11</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
