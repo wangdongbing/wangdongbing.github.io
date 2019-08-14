@@ -106,17 +106,17 @@
 <meta property="og:site_name" content="好好学习,天天向上">
 <meta property="og:description" content="概念堆（Heap） 堆是JVM运行时数据区，所有实例和数组的内存均由此分配，在JVM启动时创建。堆也是GC主要的操作区域，一般我们所说的垃圾回收都是在说堆上的垃圾回收。 存储的全部是对象，每个对象包含一个与之对应的class的信息。(class的目的是得到操作指令)  jvm只有一个堆区(heap)被所有线程共享，堆中不存放基本类型和对象引用，只存放对象本身">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://chuantu.xyz/t6/702/1562751828x2073530529.png">
-<meta property="og:image" content="http://chuantu.xyz/t6/702/1562752010x1033347913.png">
-<meta property="og:image" content="http://chuantu.xyz/t6/702/1562752298x2073530529.png">
-<meta property="og:image" content="http://chuantu.xyz/t6/702/1562752394x2073530529.png">
-<meta property="og:image" content="http://chuantu.xyz/t6/702/1562752427x2073530529.png">
-<meta property="og:image" content="http://chuantu.xyz/t6/702/1562752462x2073530529.png">
-<meta property="og:updated_time" content="2019-07-10T11:06:03.528Z">
+<meta property="og:image" content="http://www.wangdongbing.com/2019/07/10/JVM垃圾回收/gc1.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2019/07/10/JVM垃圾回收/gc2.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2019/07/10/JVM垃圾回收/gc3.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2019/07/10/JVM垃圾回收/gc4.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2019/07/10/JVM垃圾回收/gc5.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2019/07/10/JVM垃圾回收/gc6.png">
+<meta property="og:updated_time" content="2019-08-14T02:44:04.084Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="JVM垃圾回收">
 <meta name="twitter:description" content="概念堆（Heap） 堆是JVM运行时数据区，所有实例和数组的内存均由此分配，在JVM启动时创建。堆也是GC主要的操作区域，一般我们所说的垃圾回收都是在说堆上的垃圾回收。 存储的全部是对象，每个对象包含一个与之对应的class的信息。(class的目的是得到操作指令)  jvm只有一个堆区(heap)被所有线程共享，堆中不存放基本类型和对象引用，只存放对象本身">
-<meta name="twitter:image" content="http://chuantu.xyz/t6/702/1562751828x2073530529.png">
+<meta name="twitter:image" content="http://www.wangdongbing.com/2019/07/10/JVM垃圾回收/gc1.png">
 
 
 
@@ -392,12 +392,24 @@
                 
               
 
-              <time title="创建时间：2019-07-10 18:44:46 / 修改时间：19:06:03" itemprop="dateCreated datePublished" datetime="2019-07-10T18:44:46+08:00">2019-07-10</time>
+              <time title="创建时间：2019-07-10 18:44:46" itemprop="dateCreated datePublished" datetime="2019-07-10T18:44:46+08:00">2019-07-10</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-14 10:44:04" itemprop="dateModified" datetime="2019-08-14T10:44:04+08:00">2019-08-14</time>
               
             
           </span>
@@ -478,9 +490,9 @@
 <h1 id="垃圾回收算法"><a href="#垃圾回收算法" class="headerlink" title="垃圾回收算法"></a>垃圾回收算法</h1><h2 id="标记-清除算法"><a href="#标记-清除算法" class="headerlink" title="标记-清除算法"></a>标记-清除算法</h2><p>标记-清除算法分为“标记”和“清除”两个阶段：首先标记出需要回收的对象，标记完成之后统一清除对象。它的优点是效率高，缺点是容易产生内存碎片。</p>
 <h2 id="标记-复制算法"><a href="#标记-复制算法" class="headerlink" title="标记-复制算法"></a>标记-复制算法</h2><p>将可用内存容量划分为大小相等的两块，每次只使用其中的一块。当这一块用完之后，就将还存活的对象复制到另外一块上面，然后再把已使用过的内存空间一次理掉。它的优点是实现简单，效率高，不会存在内存碎片。缺点就是需要2倍的内存来管理。</p>
 <h2 id="标记-整理算法"><a href="#标记-整理算法" class="headerlink" title="标记-整理算法"></a>标记-整理算法</h2><p>标记操作和“标记-清理”算法一致，后续操作不只是直接清理对象，而是在清理无用对象完成后让所有存活的对象都向一端移动，并更新引用其对象的指针。由于要移动对象，它的效率要比“标记-清理”效率低，但是不会产生内存碎片。</p>
-<h2 id="分代回收算法"><a href="#分代回收算法" class="headerlink" title="分代回收算法"></a>分代回收算法</h2><p>由于对象的存活时间有长有短，对于存活时间长的对象，减少被gc的次数可以避免不必要的开销。这样就把内存分成新生代和老年代，新生代存放刚创建的和存活时间比较短的对象，老年代存放存活时间比较长的对象。这样每次仅仅清理年轻代，老年代仅在必要时时再做清理可以极大的提高GC效率，节省GC时间。<br><img src="http://chuantu.xyz/t6/702/1562751828x2073530529.png" alt="avatar"></p>
+<h2 id="分代回收算法"><a href="#分代回收算法" class="headerlink" title="分代回收算法"></a>分代回收算法</h2><p>由于对象的存活时间有长有短，对于存活时间长的对象，减少被gc的次数可以避免不必要的开销。这样就把内存分成新生代和老年代，新生代存放刚创建的和存活时间比较短的对象，老年代存放存活时间比较长的对象。这样每次仅仅清理年轻代，老年代仅在必要时时再做清理可以极大的提高GC效率，节省GC时间。<br><img src="/2019/07/10/JVM垃圾回收/gc1.png" alt="avatar"></p>
 <p>绝大多数的java 对象都是初始化在eden区，第一次GC过后Eden中还存活的对象被移到其中一个Survivor区；再次GC过程中，Eden中还存活的对象会被移到之前已移入对象的Survivor区；一旦该Survivor区域无空间可用时，还存活的对象会从当前Survivor区移到另一个空的Survivor区，当前Survivor区就会再次置为空状态；经过数次在两个Survivor区域移动后还存活的对象最后会被移动到老年代。两个Survivor区在任何时刻必定有一个保持空白，如果同时有数据存在于两个Survivor区或者两个区域的的使用量都是0，则意味着系统可能出现了运行错误。分代回收严格来说也算不上是算法，是对堆内存的一个分类处理，在不同的分代上使用不同的垃圾回收算法。</p>
-<h1 id="垃圾回收器"><a href="#垃圾回收器" class="headerlink" title="垃圾回收器"></a>垃圾回收器</h1><p>垃圾回收器是垃圾回收算法的具体实现，其中Serial、ParNew、Parallel Scavenge用于新生代垃圾回收，CMS、Serial Old和Parallel Old用于老年代垃圾回收，G1则取消了新生代和老年代的物理划分。<br><img src="http://chuantu.xyz/t6/702/1562752010x1033347913.png" alt="avatar"></p>
+<h1 id="垃圾回收器"><a href="#垃圾回收器" class="headerlink" title="垃圾回收器"></a>垃圾回收器</h1><p>垃圾回收器是垃圾回收算法的具体实现，其中Serial、ParNew、Parallel Scavenge用于新生代垃圾回收，CMS、Serial Old和Parallel Old用于老年代垃圾回收，G1则取消了新生代和老年代的物理划分。<br><img src="/2019/07/10/JVM垃圾回收/gc2.png" alt="avatar"></p>
 <p> HotSpot VM里多个GC有部分共享的代码。有一个分代式GC框架，Serial/Serial Old/ParNew/CMS都在这个框架内；在该框架内的young collector和old collector可以任意搭配使用，所谓的“mix-and-match”。<br> ParallelScavenge与G1则不在这个框架内，而是各自采用了自己特别的框架。</p>
 <h2 id="Serial-GC"><a href="#Serial-GC" class="headerlink" title="Serial GC"></a>Serial GC</h2><p>Serial使用单线程进行垃圾回收，垃圾回收过程中只有单个GC线程处理,独占式的垃圾回收<br>Serial 垃圾收集器会暂停所有其他系统线程进行垃圾处理<br>Serial可应用于Client环境，是虚拟机运行在Client模式下的默认新生代收集器，简单而高效（与其他收集器的单线程比），限定单个CPU的环境中没有线程交互的开销，只做垃圾收集可以获得最高的单线程收集效率。</p>
 <h2 id="Serial-Old"><a href="#Serial-Old" class="headerlink" title="Serial Old"></a>Serial Old</h2><p>Serial Old是Serial收集器的老年代版本，同样是一个单线程收集器，使用标记－整理算法。<br>Serial Old收集器的主要是给Client模式下的虚拟机使用；在Server模式下，主要还有两大用途：一种用途是在JDK 1.5以及之前的版本中与Parallel Scavenge收集器搭配使用，另一种用途就是作为CMS收集器的后备预案，在并发收集发生Concurrent Mode Failure时使用。</p>
@@ -495,7 +507,7 @@
 <li>并发清除（CMS concurrent sweep）<br>并发清除阶段会清除对象<br>由于整个过程中耗时最长的并发标记和并发清除过程收集器线程都可以与用户线程一起工作，从总体上来说，CMS收集器的内存回收过程是与用户线程一起并发执行的。</li>
 <li>缺点<br>— 对CPU资源特别敏感<br>— 无法处理浮动垃圾，可能出现“Concurrent Mode Failure”失败而导致另一次Full GC的产生。<br>— 会产生大量空间碎片</li>
 </ul>
-<h2 id="G1-GC"><a href="#G1-GC" class="headerlink" title="G1 GC"></a>G1 GC</h2><p>在G1收集器中，取消了新生代、老年代的物理空间划分，但是继续保持了分代的概念，不同于其他的分代回收算法，G1将堆空间分成一组大小相等的区域，每块区域对应虚拟机的一篇连续内存，每类区域（Region）空间可以是不连续的。不过，这些区域的一部分包含新生代，新生代的垃圾收集依然采用暂停所有应用线程的方式，将存活对象拷贝到老年代或者Survivor空间。老年代也分成很多区域，G1收集器通过将对象从一个区域复制到另外一个区域，完成了清理工作。在正常的处理过程中，G1完成了堆的压缩（至少是部分堆的压缩），不会有cms内存碎片问题。虽然在清理这些区块时G1仍然需要暂停应用线程、但可以用相对较少的时间优先回收包含垃圾最多区块。<br><img src="http://chuantu.xyz/t6/702/1562752298x2073530529.png" alt="avatar"></p>
+<h2 id="G1-GC"><a href="#G1-GC" class="headerlink" title="G1 GC"></a>G1 GC</h2><p>在G1收集器中，取消了新生代、老年代的物理空间划分，但是继续保持了分代的概念，不同于其他的分代回收算法，G1将堆空间分成一组大小相等的区域，每块区域对应虚拟机的一篇连续内存，每类区域（Region）空间可以是不连续的。不过，这些区域的一部分包含新生代，新生代的垃圾收集依然采用暂停所有应用线程的方式，将存活对象拷贝到老年代或者Survivor空间。老年代也分成很多区域，G1收集器通过将对象从一个区域复制到另外一个区域，完成了清理工作。在正常的处理过程中，G1完成了堆的压缩（至少是部分堆的压缩），不会有cms内存碎片问题。虽然在清理这些区块时G1仍然需要暂停应用线程、但可以用相对较少的时间优先回收包含垃圾最多区块。<br><img src="/2019/07/10/JVM垃圾回收/gc3.png" alt="avatar"></p>
 <p>在G1中，还有一种特殊的区域，叫Humongous区域。 如果一个对象占用的空间超过了分区容量50%以上，G1收集器就认为这是一个巨型对象。这些巨型对象，默认直接会被分配在年老代，但是如果它是一个短期存在的巨型对象，就会对垃圾收集器造成负面影响。为了解决这个问题，G1划分了一个Humongous区，用来专门存放巨型对象。如果一个H区装不下一个巨型对象，G1会寻找连续的H分区来存储。为了能找到连续的H区，有时候不得不启动Full GC。<br>PS：在java 8中，持久代也移动到了普通的堆内存空间中，改为元空间。<br>G1跟踪各个Region里面的垃圾堆积的价值大小（回收所获得的空间大小以及回收所需时间的经验值），在后台维护一个优先列表，每次根据允许的收集时间，优先回价值最大的Region（这也就是Garbage-First名称的来由）。这种使用Region划分内存空间以及有优先级的区域回收方式，保证了G1收集器在有限的时间内获可以获取尽可能高的收集效率。<br>对象分配策略<br>对象的分配策略分为以下3个阶段：</p>
 <ul>
 <li>TLAB(Thread Local Allocation Buffer)线程本地分配缓冲区</li>
@@ -504,9 +516,9 @@
 </ul>
 <p>TLAB为线程本地分配缓冲区，为了使对象尽可能快的分配出来。如果对象在一个共享的空间中分配，我们需要采用一些同步机制来管理这些空间内的空闲空间指针。在Eden空间中，每一个线程都有一个固定的分区用于分配对象，即一个TLAB。分配对象时，线程之间不再需要进行任何的同步。<br>对TLAB空间中无法分配的对象，JVM会尝试在Eden空间中进行分配。如果Eden空间无法容纳该对象，就只能在老年代中进行分配空间。<br>最后，G1提供了两种GC模式，Young GC和Mixed GC，两种都是Stop The World(STW)的。</p>
 <h3 id="Young-GC"><a href="#Young-GC" class="headerlink" title="Young GC"></a>Young GC</h3><p>Young GC主要是对Eden区进行GC，它在Eden空间耗尽时会被触发。在这种情况下，Eden空间的数据移动到Survivor空间中，如果Survivor空间不够，Eden空间的部分数据会直接晋升到年老代空间。Survivor区的数据移动到新的Survivor区中，也有部分数据晋升到老年代空间中。最终Eden空间的数据为空，GC停止工作，应用线程继续执行。</p>
-<p><img src="http://chuantu.xyz/t6/702/1562752394x2073530529.png" alt="avatar"></p>
-<p><img src="http://chuantu.xyz/t6/702/1562752427x2073530529.png" alt="avatar"></p>
-<p>G1引进了RSet（Remembered Set）的概念，用于跟踪指向某个heap区内的对象引用。<br><img src="http://chuantu.xyz/t6/702/1562752462x2073530529.png" alt="avatar"></p>
+<p><img src="/2019/07/10/JVM垃圾回收/gc4.png" alt="avatar"></p>
+<p><img src="/2019/07/10/JVM垃圾回收/gc5.png" alt="avatar"></p>
+<p>G1引进了RSet（Remembered Set）的概念，用于跟踪指向某个heap区内的对象引用。<br><img src="/2019/07/10/JVM垃圾回收/gc6.png" alt="avatar"></p>
 <p>在CMS中，也有RSet的概念，在老年代中有一块区域用来记录指向新生代的引用。这是一种point-out，在进行Young GC时，扫描根时，仅仅需要扫描这一块区域，而不需要扫描整个老年代。<br>但在G1中，并没有使用point-out，这是由于一个分区太小，分区数量太多，如果是用point-out的话，会造成大量的扫描浪费，有些根本不需要GC的分区引用也扫描了。于是G1中使用point-in来解决。point-in的意思是哪些分区引用了当前分区中的对象。这样，仅仅将这些对象当做根来扫描就避免了无效的扫描。由于新生代有多个，那么我们需要在新生代之间记录引用吗？这是不必要的，原因在于每次GC时，所有新生代都会被扫描，所以只需要记录老年代到新生代之间的引用即可。<br>需要注意的是，如果引用的对象很多，赋值器需要对每个引用做处理，赋值器开销会很大，为了解决赋值器开销这个问题，在G1 中又引入了另外一个概念，卡表（Card Table）。一个Card Table将一个分区在逻辑上划分为固定大小的连续区域，每个区域称之为卡。卡通常较小，介于128到512字节之间。Card Table通常为字节数组，由Card的索引（即数组下标）来标识每个分区的空间地址。默认情况下，每个卡都未被引用。当一个地址空间被引用时，这个地址空间对应的数组索引的值被标记为”0″，即标记为脏被引用，此外RSet也将这个数组下标记录下来。一般情况下，这个RSet其实是一个Hash Table，Key是别的Region的起始地址，Value是一个集合，里面的元素是Card Table的Index。<br>Young GC 阶段：</p>
 <ul>
 <li>阶段1：根扫描-静态和本地对象被扫描</li>
@@ -649,7 +661,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-count">10</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
