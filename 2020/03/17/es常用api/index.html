@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="在es的日常使用过程中，有些频繁使用的，比较重要的api在这里罗列下来，一是为了使用时方便，二是为了做笔记，将使用过程中的一些问题，一些疑惑记录下来">
+<meta name="keywords" content="ES,search,api">
+<meta property="og:type" content="article">
+<meta property="og:title" content="elasticsearch常用api">
+<meta property="og:url" content="http://www.wangdongbing.com/2020/03/17/es常用api/index.html">
+<meta property="og:site_name" content="好好学习,天天向上">
+<meta property="og:description" content="在es的日常使用过程中，有些频繁使用的，比较重要的api在这里罗列下来，一是为了使用时方便，二是为了做笔记，将使用过程中的一些问题，一些疑惑记录下来">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-17T07:33:06.671Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="elasticsearch常用api">
+<meta name="twitter:description" content="在es的日常使用过程中，有些频繁使用的，比较重要的api在这里罗列下来，一是为了使用时方便，二是为了做笔记，将使用过程中的一些问题，一些疑惑记录下来">
+
+
+
+
+
+
+  <link rel="canonical" href="http://www.wangdongbing.com/2020/03/17/es常用api/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>elasticsearch常用api | 好好学习,天天向上</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">好好学习,天天向上</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2020/03/17/es常用api/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="WDB">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好学习,天天向上">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">elasticsearch常用api
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-03-17 15:24:29 / 修改时间：15:33:06" itemprop="dateCreated datePublished" datetime="2020-03-17T15:24:29+08:00">2020-03-17</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/elasticsearch/" itemprop="url" rel="index"><span itemprop="name">elasticsearch</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在es的日常使用过程中，有些频繁使用的，比较重要的api在这里罗列下来，一是为了使用时方便，二是为了做笔记，将使用过程中的一些问题，一些疑惑记录下来<br><a id="more"></a></p>
+<h2 id="reindex"><a href="#reindex" class="headerlink" title="reindex"></a>reindex</h2><p>reindex 本身底层实现原理是借助scroll，所以在大数量的情况下，要对reindex做优化的话可以从scroll的优化入手，比如增加切片slices<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">POST _reindex?slices=5&amp;refresh</span><br><span class="line">&#123;</span><br><span class="line">  &quot;source&quot;: &#123;</span><br><span class="line">    &quot;index&quot;: &quot;portal_news_201&quot;,</span><br><span class="line">    &quot;size&quot;: 2000</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;dest&quot;: &#123;</span><br><span class="line">    &quot;index&quot;: &quot;portal_news_test&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">`</span><br></pre></td></tr></table></figure></p>
+<h2 id="分页-amp-深度分页"><a href="#分页-amp-深度分页" class="headerlink" title="分页&amp;深度分页"></a>分页&amp;深度分页</h2><h4 id="from-size"><a href="#from-size" class="headerlink" title="from+size"></a>from+size</h4><p>能够实现随意跳页，目前最大只能查询到10000条数据  index.max_result_window:10000，可以修改参数，但是不建议,越往后性能越差</p>
+<h3 id="search-after"><a href="#search-after" class="headerlink" title="search_after"></a>search_after</h3><p>为了解决深度分页，ES在5.0版本之前推荐使用scroll，但是scroll不适合实时场景，所以在ES5.0之后推出了search_after解决深度分页问题<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">第一次请求</span><br><span class="line">POST portal_news/_search</span><br><span class="line">&#123;</span><br><span class="line">  &quot;query&quot;: &#123;</span><br><span class="line">    &quot;range&quot;: &#123;</span><br><span class="line">      &quot;pub_date&quot;: &#123;</span><br><span class="line">        &quot;gte&quot;: &quot;2020-01-01&quot;,</span><br><span class="line">        &quot;lte&quot;: &quot;2020-04-01&quot;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;size&quot;: 10,</span><br><span class="line">  &quot;sort&quot;: [</span><br><span class="line">    &#123;</span><br><span class="line">      &quot;pub_date&quot;: &#123;</span><br><span class="line">        &quot;order&quot;: &quot;desc&quot;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>请注意至少要带上一个排序字段<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">后续请求，带上第一次请求返回的sort值</span><br><span class="line">POST portal_news/_search</span><br><span class="line">&#123;</span><br><span class="line">  &quot;query&quot;: &#123;</span><br><span class="line">    &quot;range&quot;: &#123;</span><br><span class="line">      &quot;pub_date&quot;: &#123;</span><br><span class="line">        &quot;gte&quot;: &quot;2020-01-01&quot;,</span><br><span class="line">        &quot;lte&quot;: &quot;2020-04-01&quot;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;size&quot;: 10,</span><br><span class="line">  &quot;sort&quot;: [</span><br><span class="line">    &#123;</span><br><span class="line">      &quot;pub_date&quot;: &#123;</span><br><span class="line">        &quot;order&quot;: &quot;desc&quot;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  ],</span><br><span class="line">  &quot;search_after&quot;:[1584454145000]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="scroll"><a href="#scroll" class="headerlink" title="scroll"></a>scroll</h3><p>ES5.0之前推荐的深度分页解决方案，但并不适合实时场景，在分页方面后续被search_after取代<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">第一次请求</span><br><span class="line">POST  portal_news/_search?scroll=1m</span><br><span class="line">&#123;</span><br><span class="line">  &quot;query&quot;: &#123;</span><br><span class="line">    &quot;range&quot;: &#123;</span><br><span class="line">      &quot;pub_date&quot;: &#123;</span><br><span class="line">        &quot;gte&quot;: &quot;2020-01-01&quot;,</span><br><span class="line">        &quot;lte&quot;: &quot;2020-03-20&quot;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;size&quot;:100</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">第二次请求</span><br><span class="line">POST /_search/scroll</span><br><span class="line">&#123;</span><br><span class="line">  &quot;scroll&quot;:&quot;1m&quot;,</span><br><span class="line">  &quot;scroll_id&quot;: &quot;DnF1ZXJ5VGhlbkZldGNoCAAAAAAA53jzFldqM3VMUGhLUWNPTVU5MVVwbkd6Z2cAAAAAAOSKdxZ5MFA1NGVhS1NDMjRRa1llOFRKMjRnAAAAAAEQobkWaDB3emVldXFTb3VnS05mci1JSnFnQQAAAAABEKG7Fmgwd3plZXVxU291Z0tOZnItSUpxZ0EAAAAAARAGWRZFM3I1eGMycVRxZTgyR2pZdG91Q2pRAAAAAADnePQWV2ozdUxQaEtRY09NVTkxVXBuR3pnZwAAAAAA5Ip2FnkwUDU0ZWFLU0MyNFFrWWU4VEoyNGcAAAAAARChuhZoMHd6ZWV1cVNvdWdLTmZyLUlKcWdB&quot;</span><br><span class="line">  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="search-after-和scroll比较"><a href="#search-after-和scroll比较" class="headerlink" title="search_after 和scroll比较"></a>search_after 和scroll比较</h3><ol>
+<li>当搜索请求返回单个“页”的结果时，scroll可以用来从单个搜索请求获取大量接口。甚至是所有结果，类似于rds中的游标， 但是维持scroll上线文代价高昂</li>
+<li>scroll的设计并不是为了实时用户请求，而是为了处理大量数据，例如索引的reindex， search_after的设计则是用于用户实时搜索的</li>
+<li>search_after则提供了一个活动的游标来避免这个问题，主要思想是使用上一页的结果帮助检索下一页</li>
+<li>search_after是无状态的</li>
+</ol>
+<h2 id="数据备份和恢复"><a href="#数据备份和恢复" class="headerlink" title="数据备份和恢复"></a>数据备份和恢复</h2><p>ES数据的备份和恢复依赖于快照和仓库的机制，例如_snapshot/myback<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">先关闭索引</span><br><span class="line">POST index_name/_close</span><br><span class="line"></span><br><span class="line">异步调用</span><br><span class="line">POST _snapshot/my_backup/snapshot_1/_restore</span><br><span class="line">同步阻塞</span><br><span class="line">POST _snapshot/my_backup/snapshot_1/_restore?wait_for_completion=true</span><br><span class="line"></span><br><span class="line">最后打开索引</span><br><span class="line">POST index_name/_open</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">监控快照状态</span><br><span class="line">GET _snapshot/my_backup/snapshot_1/_status</span><br></pre></td></tr></table></figure>
+<h2 id="结果震荡"><a href="#结果震荡" class="headerlink" title="结果震荡"></a>结果震荡</h2><p>搜索同一query， 结果ES返回的顺序却不尽相同， 这就是请求轮询到不同分片， 而未设置排序条件， 相同相关性评分情况下， 是按照所在segment中​ lucene id来排序的， 相同数据的不同备份之间该id是不能保证一致的， 故造成结果震荡问题。<br>如设置该参数， 则有一下9种情况</p>
+<ul>
+<li><code>_primary</code>: 发送到集群的相关操作请求只会在主分片上执行。 </li>
+<li><code>_primary_first</code>: 指查询会先在主分片中查询， 如果主分片找不到（ 挂了）， 就会在副本中查询。 </li>
+<li><code>_replica</code>: 发送到集群的相关操作请求只会在副本上执行。 </li>
+<li><code>_replica_first</code>：指查询会先在副本中查询， 如果副本找不到（ 挂了）， 就会在主分片中查询。</li>
+<li><code>_local</code>: 指查询操作会优先在本地节点有的分片中查询， 没有的话再在其它节点查询。 </li>
+<li><code>_prefer_nodes:abc,xyz</code>: 在提供的节点上优先执行（ 在这种情况下为 ‘abc’或 ‘xyz’）</li>
+<li><code>_shards:2,3</code>：限制操作到指定的分片。（ <code>2</code>和“ 3”）。 这个偏好可以与其他偏好组合， 但必须首先出现： <code>_shards：2,3 | _primary</code></li>
+<li><code>_only_nodes:node1,node2</code>: 指在指定id的节点里面进行查询， 如果该节点只有要查询索引的部分分片， 就只在这部分分片中查找， 不同节点之间用“，” 分隔。</li>
+<li>custom(自定义)： 注意自定义的preference参数不能以下划线 “_”开头。当preference为自定义时， 即该参数不为空， 且开头不以“ 下划线” 开头时， 特别注意： 如果以用户query作为自定义preference时， 一定要处理以下划线开头的情况， 这种情况下如果不属于以上8种情况， 则会抛出异常。</li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ES/" rel="tag"># ES</a>
+          
+            <a href="/tags/search/" rel="tag"># search</a>
+          
+            <a href="/tags/api/" rel="tag"># api</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/08/14/databus安装教程/" rel="next" title="databus安装教程">
+                <i class="fa fa-chevron-left"></i> databus安装教程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">WDB</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#reindex"><span class="nav-number">1.</span> <span class="nav-text">reindex</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分页-amp-深度分页"><span class="nav-number">2.</span> <span class="nav-text">分页&amp;深度分页</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#from-size"><span class="nav-number">2.0.1.</span> <span class="nav-text">from+size</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#search-after"><span class="nav-number">2.1.</span> <span class="nav-text">search_after</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#scroll"><span class="nav-number">2.2.</span> <span class="nav-text">scroll</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#search-after-和scroll比较"><span class="nav-number">2.3.</span> <span class="nav-text">search_after 和scroll比较</span></a></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#数据备份和恢复"><span class="nav-number">3.</span> <span class="nav-text">数据备份和恢复</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结果震荡"><span class="nav-number">4.</span> <span class="nav-text">结果震荡</span></a></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">WDB</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/schemes/muse.js?v=7.0.1"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
