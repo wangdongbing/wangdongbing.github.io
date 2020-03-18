@@ -40,6 +40,10 @@
 
 
 
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5">
+
 
 
 
@@ -77,7 +81,7 @@
     sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
     back2top: true,
     back2top_sidebar: false,
-    fancybox: false,
+    fancybox: true,
     fastclick: false,
     lazyload: false,
     tabs: true,
@@ -98,19 +102,19 @@
 
 
 
-  <meta name="description" content="在最近学习databus的过程中，除了看源码，还有很重要的就是实操，databus搭建，测试，链接msyql，orcle，将整个系统跑起来，有助于源码的理解，下面以msyql为例，将整个流程执行一遍 简介Databus是一个实时的、可靠的、支持事务的、保持一致性的数据变更抓取系统。 2011年在LinkedIn正式进入生产系统，2013年开源。Databus通过挖掘数据库日志的方式，将数据库变更实">
-<meta name="keywords" content="binlog,教程,databus">
+  <meta name="description" content="在最近学习databus的过程中，除了看源码，还有很重要的就是实操，databus搭建，测试，链接msyql，orcle，将整个系统跑起来，有助于源码的理解，下面以msyql为例，将整个流程执行一遍">
+<meta name="keywords" content="databus,binlog,教程">
 <meta property="og:type" content="article">
 <meta property="og:title" content="databus安装教程">
 <meta property="og:url" content="http://www.wangdongbing.com/2019/08/14/databus安装教程/index.html">
 <meta property="og:site_name" content="好好学习,天天向上">
-<meta property="og:description" content="在最近学习databus的过程中，除了看源码，还有很重要的就是实操，databus搭建，测试，链接msyql，orcle，将整个系统跑起来，有助于源码的理解，下面以msyql为例，将整个流程执行一遍 简介Databus是一个实时的、可靠的、支持事务的、保持一致性的数据变更抓取系统。 2011年在LinkedIn正式进入生产系统，2013年开源。Databus通过挖掘数据库日志的方式，将数据库变更实">
+<meta property="og:description" content="在最近学习databus的过程中，除了看源码，还有很重要的就是实操，databus搭建，测试，链接msyql，orcle，将整个系统跑起来，有助于源码的理解，下面以msyql为例，将整个流程执行一遍">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://www.wangdongbing.com/2019/08/14/databus安装教程/databus-relay.png">
-<meta property="og:updated_time" content="2020-03-17T07:43:15.231Z">
+<meta property="og:updated_time" content="2020-03-17T16:40:52.762Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="databus安装教程">
-<meta name="twitter:description" content="在最近学习databus的过程中，除了看源码，还有很重要的就是实操，databus搭建，测试，链接msyql，orcle，将整个系统跑起来，有助于源码的理解，下面以msyql为例，将整个流程执行一遍 简介Databus是一个实时的、可靠的、支持事务的、保持一致性的数据变更抓取系统。 2011年在LinkedIn正式进入生产系统，2013年开源。Databus通过挖掘数据库日志的方式，将数据库变更实">
+<meta name="twitter:description" content="在最近学习databus的过程中，除了看源码，还有很重要的就是实操，databus搭建，测试，链接msyql，orcle，将整个系统跑起来，有助于源码的理解，下面以msyql为例，将整个流程执行一遍">
 <meta name="twitter:image" content="http://www.wangdongbing.com/2019/08/14/databus安装教程/databus-relay.png">
 
 
@@ -404,7 +408,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2020-03-17 15:43:15" itemprop="dateModified" datetime="2020-03-17T15:43:15+08:00">2020-03-17</time>
+                <time title="修改时间：2020-03-18 00:40:52" itemprop="dateModified" datetime="2020-03-18T00:40:52+08:00">2020-03-18</time>
               
             
           </span>
@@ -456,9 +460,7 @@
       
 
       
-        <p>在最近学习databus的过程中，除了看源码，还有很重要的就是实操，databus搭建，测试，链接msyql，orcle，将整个系统跑起来，有助于源码的理解，下面以msyql为例，将整个流程执行一遍</p>
-<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Databus是一个实时的、可靠的、支持事务的、保持一致性的数据变更抓取系统。 2011年在LinkedIn正式进入生产系统，2013年开源。<br>Databus通过挖掘数据库日志的方式，将数据库变更实时、可靠的从数据库拉取出来，业务可以通过定制化client实时获取变更。<br>Databus的传输层端到端延迟是微秒级的，每台服务器每秒可以处理数千次数据吞吐变更事件，同时还支持无限回溯能力和丰富的变更订阅功能。</p>
-<a id="more"></a>
+        <p>在最近学习databus的过程中，除了看源码，还有很重要的就是实操，databus搭建，测试，链接msyql，orcle，将整个系统跑起来，有助于源码的理解，下面以msyql为例，将整个流程执行一遍<br><a id="more"></a></p>
 <h2 id="准备mysql"><a href="#准备mysql" class="headerlink" title="准备mysql"></a>准备mysql</h2><p>1：首先确认据库是否开启binlog,如果binlog没有开启，可以通过set sql_log_bin=1命令来启用<br>2：配置数据库binlog_format=ROW， show variables like ‘binlog_format‘可查看日志格式， set globle binlog_format=ROW可修改，最好在my.cnf中修改<br>3：binlog_checksum设置为空，show global variables like ‘binlog_checksum’命令可查看，set binlog_checksum=none可设值，同样最好在my.cnf中修改<br>4：确认my.cnf中有server_id配置，设置之后需要重启</p>
 <h2 id="下载源码"><a href="#下载源码" class="headerlink" title="下载源码"></a>下载源码</h2><p>Databus官网下载源码，下载地址<a href="https://github.com/linkedin/databus.git" target="_blank" rel="noopener">https://github.com/linkedin/databus.git</a>.<br>我们需要用到databus目录下的databus2-example文件夹，在此基础上改造并运行，目录结构及介绍如下：<br>database：数据库模拟相关的脚本和工具<br>databus2-example-bst-producer-pkg：bootstrap producer的属性配置文件夹，包括bootstrap producer和log4j属性文件，build脚本以及bootstrap producer的启动和停止脚本。<br>databus2-example-client-pkg：client的属性配置文件夹，包括各种属性文件和启动和停止脚本。<br>databus2-example-client：client源代码，包含启动主类和消费者代码逻辑。<br>databus2-example-relay-pkg：relay的属性配置文件夹，包含监控的表的source信息和Avro schema。<br>databus2-example-relay：relay的启动主类。<br>schemas_registry：存放表的avsc文件。</p>
 <h2 id="Relay端配置"><a href="#Relay端配置" class="headerlink" title="Relay端配置"></a>Relay端配置</h2><p>Relay属性文件：databus2-example-relay-pkg/conf/relay-or-person.properties为relay配置，包括端口号，buffer存储策略，maxScn存放地址等信息，重点关注maxScn的存放地址，relay启动之后会在改目录下创建MaxScn_Person文件，需要确保有权限写入<br>databus.relay.dataSources.sequenceNumbersHandler.file.scnDir=/tmp/maxScn<br>被监控表配置文件：databus2-example-relay-pkg/conf/sources-or-person.json<br>其中URI format:mysql://username/password@mysql_host[:mysql_port]/mysql_serverid/binlog_prefix，注意%2F为转义字符，用户名为root,数据库密码为root。</p>
@@ -507,11 +509,11 @@ slave执行 ：mysql&gt; CHANGE MASTER TO MASTER_LOG_FILE=&apos;mysqld-bin.00001
       
         <div class="post-tags">
           
+            <a href="/tags/databus/" rel="tag"># databus</a>
+          
             <a href="/tags/binlog/" rel="tag"># binlog</a>
           
             <a href="/tags/教程/" rel="tag"># 教程</a>
-          
-            <a href="/tags/databus/" rel="tag"># databus</a>
           
         </div>
       
@@ -605,7 +607,7 @@ slave执行 ：mysql&gt; CHANGE MASTER TO MASTER_LOG_FILE=&apos;mysqld-bin.00001
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-count">15</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -707,7 +709,9 @@ slave执行 ：mysql&gt; CHANGE MASTER TO MASTER_LOG_FILE=&apos;mysqld-bin.00001
                     
                       
                     
-                    <span class="site-state-item-count">25</span>
+                      
+                    
+                    <span class="site-state-item-count">26</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -743,7 +747,7 @@ slave执行 ：mysql&gt; CHANGE MASTER TO MASTER_LOG_FILE=&apos;mysqld-bin.00001
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#准备mysql"><span class="nav-number">2.</span> <span class="nav-text">准备mysql</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#下载源码"><span class="nav-number">3.</span> <span class="nav-text">下载源码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Relay端配置"><span class="nav-number">4.</span> <span class="nav-text">Relay端配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Client端配置"><span class="nav-number">5.</span> <span class="nav-text">Client端配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#build-启动-测试"><span class="nav-number">6.</span> <span class="nav-text">build-启动-测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#启动Relay"><span class="nav-number">6.1.</span> <span class="nav-text">启动Relay:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动Client"><span class="nav-number">6.2.</span> <span class="nav-text">启动Client:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试"><span class="nav-number">6.3.</span> <span class="nav-text">测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#问题"><span class="nav-number">6.4.</span> <span class="nav-text">问题</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#准备mysql"><span class="nav-number">1.</span> <span class="nav-text">准备mysql</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#下载源码"><span class="nav-number">2.</span> <span class="nav-text">下载源码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Relay端配置"><span class="nav-number">3.</span> <span class="nav-text">Relay端配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Client端配置"><span class="nav-number">4.</span> <span class="nav-text">Client端配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#build-启动-测试"><span class="nav-number">5.</span> <span class="nav-text">build-启动-测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#启动Relay"><span class="nav-number">5.1.</span> <span class="nav-text">启动Relay:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动Client"><span class="nav-number">5.2.</span> <span class="nav-text">启动Client:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试"><span class="nav-number">5.3.</span> <span class="nav-text">测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#问题"><span class="nav-number">5.4.</span> <span class="nav-text">问题</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -835,6 +839,8 @@ slave执行 ：mysql&gt; CHANGE MASTER TO MASTER_LOG_FILE=&apos;mysqld-bin.00001
 
 
 
+  
+
 
 
 
@@ -857,6 +863,9 @@ slave执行 ：mysql&gt; CHANGE MASTER TO MASTER_LOG_FILE=&apos;mysqld-bin.00001
 
   
   <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
 
 
   

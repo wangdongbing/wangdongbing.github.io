@@ -40,6 +40,10 @@
 
 
 
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5">
+
 
 
 
@@ -77,7 +81,7 @@
     sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
     back2top: true,
     back2top_sidebar: false,
-    fancybox: false,
+    fancybox: true,
     fastclick: false,
     lazyload: false,
     tabs: true,
@@ -98,25 +102,28 @@
 
 
 
-  <meta name="description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
-<meta name="keywords" content="npm,hexo,github">
+  <meta name="description" content="springboot中main方法执行完为什么不退出首先明白一个概念，守护线程和用户线程，Daemon Thread和User Thread  定义：守护线程，在没有用户线程可服务时会自动离开。 优先级：守护线程的优先级较低，用于为系统中的其它对象和线程提供服务。在main方法中，如果有非守护线程，那么main方法执行完之后，JVM不会立即退出，会等到所有的非守护线程执行完之后才退出，下面是一个新">
+<meta name="keywords" content="启动,springboot,线程">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hello World">
-<meta property="og:url" content="http://www.wangdongbing.com/2019/03/08/hello-world/index.html">
+<meta property="og:title" content="日常疑问">
+<meta property="og:url" content="http://www.wangdongbing.com/2019/07/22/日常疑问随写/index.html">
 <meta property="og:site_name" content="好好学习,天天向上">
-<meta property="og:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+<meta property="og:description" content="springboot中main方法执行完为什么不退出首先明白一个概念，守护线程和用户线程，Daemon Thread和User Thread  定义：守护线程，在没有用户线程可服务时会自动离开。 优先级：守护线程的优先级较低，用于为系统中的其它对象和线程提供服务。在main方法中，如果有非守护线程，那么main方法执行完之后，JVM不会立即退出，会等到所有的非守护线程执行完之后才退出，下面是一个新">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-06-19T09:15:07.740Z">
+<meta property="og:image" content="http://www.wangdongbing.com/2019/07/22/日常疑问随写/jprofiler2.PNG">
+<meta property="og:image" content="http://www.wangdongbing.com/2019/07/22/日常疑问随写/jprofiler1.PNG">
+<meta property="og:updated_time" content="2020-03-18T09:53:44.046Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hello World">
-<meta name="twitter:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+<meta name="twitter:title" content="日常疑问">
+<meta name="twitter:description" content="springboot中main方法执行完为什么不退出首先明白一个概念，守护线程和用户线程，Daemon Thread和User Thread  定义：守护线程，在没有用户线程可服务时会自动离开。 优先级：守护线程的优先级较低，用于为系统中的其它对象和线程提供服务。在main方法中，如果有非守护线程，那么main方法执行完之后，JVM不会立即退出，会等到所有的非守护线程执行完之后才退出，下面是一个新">
+<meta name="twitter:image" content="http://www.wangdongbing.com/2019/07/22/日常疑问随写/jprofiler2.PNG">
 
 
 
 
 
 
-  <link rel="canonical" href="http://www.wangdongbing.com/2019/03/08/hello-world/">
+  <link rel="canonical" href="http://www.wangdongbing.com/2019/07/22/日常疑问随写/">
 
 
 
@@ -126,7 +133,7 @@
   };
 </script>
 
-  <title>Hello World | 好好学习,天天向上</title>
+  <title>日常疑问 | 好好学习,天天向上</title>
   
 
 
@@ -342,7 +349,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2019/03/08/hello-world/">
+    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2019/07/22/日常疑问随写/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="WDB">
@@ -359,7 +366,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Hello World
+          <h1 class="post-title" itemprop="name headline">日常疑问
 
               
             
@@ -385,7 +392,7 @@
                 
               
 
-              <time title="创建时间：2019-03-08 11:13:39" itemprop="dateCreated datePublished" datetime="2019-03-08T11:13:39+08:00">2019-03-08</time>
+              <time title="创建时间：2019-07-22 19:47:35" itemprop="dateCreated datePublished" datetime="2019-07-22T19:47:35+08:00">2019-07-22</time>
             
 
             
@@ -402,7 +409,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-06-19 17:15:07" itemprop="dateModified" datetime="2019-06-19T17:15:07+08:00">2019-06-19</time>
+                <time title="修改时间：2020-03-18 17:53:44" itemprop="dateModified" datetime="2020-03-18T17:53:44+08:00">2020-03-18</time>
               
             
           </span>
@@ -419,7 +426,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/搭建博客/" itemprop="url" rel="index"><span itemprop="name">搭建博客</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/日常问题/" itemprop="url" rel="index"><span itemprop="name">日常问题</span></a></span>
 
                 
                 
@@ -454,17 +461,12 @@
       
 
       
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<a id="more"></a>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">S0: Survivor 0区的空间使用率 Survivor space 0 utilization as a percentage of the space<span class="string">'s current capacity. </span></span><br><span class="line"><span class="string">S1: Survivor 1区的空间使用率 Survivor space 1 utilization as a percentage of the space'</span>s current capacity. </span><br><span class="line">E: Eden区的空间使用率 Eden space utilization as a percentage of the space<span class="string">'s current capacity. </span></span><br><span class="line"><span class="string">O: 老年代的空间使用率 Old space utilization as a percentage of the space'</span>s current capacity. </span><br><span class="line">M: 元数据的空间使用率 Metaspace utilization as a percentage of the space<span class="string">'s current capacity. </span></span><br><span class="line"><span class="string">CCS: 类指针压缩空间使用率 Compressed class space utilization as a percentage. </span></span><br><span class="line"><span class="string">YGC: 新生代GC次数 Number of young generation GC events. </span></span><br><span class="line"><span class="string">YGCT: 新生代GC总时长 Young generation garbage collection time. </span></span><br><span class="line"><span class="string">FGC: Full GC次数 Number of full GC events. FGCT: Full GC总时长 Full garbage collection time. </span></span><br><span class="line"><span class="string">GCT: 总共的GC时长 Total garbage collection time.</span></span><br></pre></td></tr></table></figure>
+        <h2 id="springboot中main方法执行完为什么不退出"><a href="#springboot中main方法执行完为什么不退出" class="headerlink" title="springboot中main方法执行完为什么不退出"></a>springboot中main方法执行完为什么不退出</h2><p>首先明白一个概念，守护线程和用户线程，Daemon Thread和User Thread</p>
+<ul>
+<li>定义：守护线程，在没有用户线程可服务时会自动离开。</li>
+<li>优先级：守护线程的优先级较低，用于为系统中的其它对象和线程提供服务。<br>在main方法中，如果有非守护线程，那么main方法执行完之后，JVM不会立即退出，会等到所有的非守护线程执行完之后才退出，下面是一个新建的springboot项目中，启动后，通过jprofiler查看到的线程情况<br><img src="/2019/07/22/日常疑问随写/jprofiler2.PNG" alt="bp"><br>从上图可以看出，main线程结束之后，其他子线程依旧在运行，在看下dump可以看出，main2线程在sleep<br><img src="/2019/07/22/日常疑问随写/jprofiler1.PNG" alt="blockchain" title="jprofiler"><br>通过dump信息，追踪到代码中，可以看出main2的sleep是由于dubbo的TpsLimitFilter类启动了new Thread，并且sleep<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">        (<span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">while</span>(<span class="keyword">true</span>) &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">1000L</span>);</span><br><span class="line">                        <span class="keyword">synchronized</span>(TpsLimitFilter.notifyObject) &#123;</span><br><span class="line">                            TpsLimitFilter.notifyObject.notifyAll();</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException var4) &#123;</span><br><span class="line">                        var4.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)).start();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
 
       
     </div>
@@ -488,11 +490,11 @@
       
         <div class="post-tags">
           
-            <a href="/tags/npm/" rel="tag"># npm</a>
+            <a href="/tags/启动/" rel="tag"># 启动</a>
           
-            <a href="/tags/hexo/" rel="tag"># hexo</a>
+            <a href="/tags/springboot/" rel="tag"># springboot</a>
           
-            <a href="/tags/github/" rel="tag"># github</a>
+            <a href="/tags/线程/" rel="tag"># 线程</a>
           
         </div>
       
@@ -505,14 +507,18 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2019/07/11/LRU/" rel="next" title="常见LRU算法">
+                <i class="fa fa-chevron-left"></i> 常见LRU算法
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/03/14/直连系统实践/" rel="prev" title="美团境外度假直连系统实践">
-                美团境外度假直连系统实践 <i class="fa fa-chevron-right"></i>
+              <a href="/2019/07/22/zookeeper/" rel="prev" title="zookeeper原理与使用">
+                zookeeper原理与使用 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -582,7 +588,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-count">15</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -684,7 +690,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">25</span>
+                      
+                    
+                    <span class="site-state-item-count">26</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -720,7 +728,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Quick-Start"><span class="nav-number">1.</span> <span class="nav-text">Quick Start</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Create-a-new-post"><span class="nav-number">1.1.</span> <span class="nav-text">Create a new post</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Run-server"><span class="nav-number">1.2.</span> <span class="nav-text">Run server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Generate-static-files"><span class="nav-number">1.3.</span> <span class="nav-text">Generate static files</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Deploy-to-remote-sites"><span class="nav-number">1.4.</span> <span class="nav-text">Deploy to remote sites</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#springboot中main方法执行完为什么不退出"><span class="nav-number">1.</span> <span class="nav-text">springboot中main方法执行完为什么不退出</span></a></li></ol></div>
             
 
           </div>
@@ -741,7 +749,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
@@ -812,6 +820,8 @@
 
 
 
+  
+
 
 
 
@@ -834,6 +844,9 @@
 
   
   <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
 
 
   
