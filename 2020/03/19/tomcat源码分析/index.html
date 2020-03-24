@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5">
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="基本概念名称由来：Tomcat最初是由Sun的软件构架师詹姆斯·邓肯·戴维森开发的。后来他帮助将其变为开源项目，并由Sun贡献给Apache软件基金会。由于大部分开源项目O’Reilly都会出一本相关的书，并且将其封面设计成某个动物的素描，因此他希望将此项目以一个动物的名字命名。因为他希望这种动物能够自己照顾自己，最终，他将其命名为Tomcat（英语公猫或其他雄性猫科动物）。而O’Reilly出版">
+<meta name="keywords" content="databus,binlog,教程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="tomcat源码分析">
+<meta property="og:url" content="http://www.wangdongbing.com/2020/03/19/tomcat源码分析/index.html">
+<meta property="og:site_name" content="好好学习,天天向上">
+<meta property="og:description" content="基本概念名称由来：Tomcat最初是由Sun的软件构架师詹姆斯·邓肯·戴维森开发的。后来他帮助将其变为开源项目，并由Sun贡献给Apache软件基金会。由于大部分开源项目O’Reilly都会出一本相关的书，并且将其封面设计成某个动物的素描，因此他希望将此项目以一个动物的名字命名。因为他希望这种动物能够自己照顾自己，最终，他将其命名为Tomcat（英语公猫或其他雄性猫科动物）。而O’Reilly出版">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/03/19/tomcat源码分析/tomcat-arc.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/03/19/tomcat源码分析/tomcat-service.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/03/19/tomcat源码分析/tomcat-standardservice.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/03/19/tomcat源码分析/tomcat-lifecycle.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/03/19/tomcat源码分析/tomcat-connector.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/03/19/tomcat源码分析/tomcat-connector-class.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/03/19/tomcat源码分析/tomcat-context.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/03/19/tomcat源码分析/tomcat-servlet.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/03/19/tomcat源码分析/tomcat-host.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/03/19/tomcat源码分析/tomcat-loadservlet.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/03/19/tomcat源码分析/tomcat-request.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/03/19/tomcat源码分析/tomcat-request2.png">
+<meta property="og:updated_time" content="2020-03-19T15:56:09.791Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="tomcat源码分析">
+<meta name="twitter:description" content="基本概念名称由来：Tomcat最初是由Sun的软件构架师詹姆斯·邓肯·戴维森开发的。后来他帮助将其变为开源项目，并由Sun贡献给Apache软件基金会。由于大部分开源项目O’Reilly都会出一本相关的书，并且将其封面设计成某个动物的素描，因此他希望将此项目以一个动物的名字命名。因为他希望这种动物能够自己照顾自己，最终，他将其命名为Tomcat（英语公猫或其他雄性猫科动物）。而O’Reilly出版">
+<meta name="twitter:image" content="http://www.wangdongbing.com/2020/03/19/tomcat源码分析/tomcat-arc.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://www.wangdongbing.com/2020/03/19/tomcat源码分析/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>tomcat源码分析 | 好好学习,天天向上</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">好好学习,天天向上</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2020/03/19/tomcat源码分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="WDB">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好学习,天天向上">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">tomcat源码分析
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-03-19 23:08:30 / 修改时间：23:56:09" itemprop="dateCreated datePublished" datetime="2020-03-19T23:08:30+08:00">2020-03-19</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/数据同步/" itemprop="url" rel="index"><span itemprop="name">数据同步</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h1><p><code>名称由来</code>：Tomcat最初是由Sun的软件构架师詹姆斯·邓肯·戴维森开发的。后来他帮助将其变为开源项目，并由Sun贡献给Apache软件基金会。由于大部分开源项目O’Reilly都会出一本相关的书，并且将其封面设计成某个动物的素描，因此他希望将此项目以一个动物的名字命名。因为他希望这种动物能够自己照顾自己，最终，他将其命名为Tomcat（英语公猫或其他雄性猫科动物）。而O’Reilly出版的介绍Tomcat的书籍（ISBN 0-596-00318-8）[1]的封面也被设计成了一个公猫的形象。而Tomcat的Logo兼吉祥物也被设计成了一只公猫。<br>Apache（Apache HTTP Server）只支持静态网页，但像php,cgi,jsp等动态网页就需要Tomcat来处理。 Tomcat是由Apache软件基金会下属的Jakarta项目开发的一个Servlet容器<br>Apache是web服务器，Tomcat是应用（java）服务器<br><a id="more"></a><br><code>catalina</code><br>Apache HTTP Server负责接受所有来自客户端的HTTP请求，然后将Servlets和JSP的请求转发给Tomcat来处理。Tomcat完成处理后，将响应传回给Apache，最后Apache将响应返回给客户端。于是在tomcat中运行Java程序也就是Servlet的那个模块因为体现了tomcat最核心特点而引起了大家的重视，而这个模块的名字叫做Catalina。Catalina是太平洋中靠近洛杉矶的一个小岛。因为其风景秀丽而著名。曾被评为全美最漂亮的小岛。<br><code>server和service</code><br><code>server</code>：n,服务器; 侍者; 上菜用具; 发球者<br><code>service</code>：n,服役; 服务，服侍; 服务业; 维修服务<br>在日常软件开发中，server应该是一个部署的项目，一个application，而service是server提供的很多服务中的一个，一个是容器，一个是容器里面的东西。</p>
+<h1 id="总体架构"><a href="#总体架构" class="headerlink" title="总体架构"></a>总体架构</h1><p><img src="/2020/03/19/tomcat源码分析/tomcat-arc.png" alt="avatar"></p>
+<p>从上图中可以看出 Tomcat 的心脏是两个组件：Connector 和 Container，Connector 组件是可以被替换，这样可以提供给服务器设计者更多的选择，因为这个组件是如此重要，不仅跟服务器的设计的本身，而且和不同的应用场景也十分相关，所以一个 Container 可以选择对应多个 Connector。多个 Connector 和一个 Container 就形成了一个 Service，Service 的概念大家都很熟悉了，有了 Service 就可以对外提供服务了，但是 Service 还要一个生存的环境，必须要有人能够给她生命、掌握其生死大权，那就非 Server 莫属了。所以整个 Tomcat 的生命周期由 Server 控制。</p>
+<h2 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h2><p>我们将 Tomcat 中 catalina模块比作一个部门的话，小组leader负责对外交流，控制需求，审核需求，相当于Connector， 而小组组员则负责完成需求，相当于Container，那么他们共同组成的Tema1就是一个servcie。可以类比下，在我们平常工作中，是 Service 将它们连接在一起，共同组成一个Team。<br>说白了，Service 只是在 Connector 和 Container 外面多包一层，把它们组装在一起，向外面提供服务，一个 Service 可以设置多个 Connector，但是只能有一个 Container 容器。这个 Service 接口的方法列表如下：<br><img src="/2020/03/19/tomcat源码分析/tomcat-service.png" alt="avatar"></p>
+<p>从 Service 接口中定义的方法中可以看出，它主要是为了关联 Connector 和 Container，同时会初始化它下面的其它组件，注意接口中它并没有规定一定要控制它下面的组件的生命周期。所有组件的生命周期在一个 Lifecycle 的接口中控制，这里用到了一个重要的设计模式，关于这个接口将在后面介绍。<br>Tomcat 中 Service 接口的标准实现类是 StandardService 它不仅实现了 Service 接口同时还实现了 LifecycleBase 接口，这样它就可以控制它下面的组件的生命周期了。StandardService 类结构图如下：<br><img src="/2020/03/19/tomcat源码分析/tomcat-standardservice.png" alt="avatar"></p>
+<p>从上图中可以看出除了 Service 接口的方法的实现以及控制组件生命周期的 Lifecycle 接口的实现，还有几个方法是用于在事件监听的方法的实现，不仅是这个 Service 组件，Tomcat 中其它组件也同样有这几个方法，这也是一个典型的设计模式，将在后面介绍。<br>下面看一下 StandardService 中主要的几个方法实现的代码，下面是 setContainer 和 addConnector 方法的源码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setContainer</span><span class="params">(Engine engine)</span> </span>&#123;</span><br><span class="line">        Engine oldEngine = <span class="keyword">this</span>.engine;</span><br><span class="line">        <span class="keyword">if</span> (oldEngine != <span class="keyword">null</span>) &#123;</span><br><span class="line">            oldEngine.setService(<span class="keyword">null</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">this</span>.engine = engine;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.engine != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">this</span>.engine.setService(<span class="keyword">this</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (getState().isAvailable()) &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="keyword">this</span>.engine != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="keyword">this</span>.engine.start();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">                    log.warn(sm.getString(<span class="string">"standardService.engine.startFailed"</span>), e);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// Restart MapperListener to pick up new engine.</span></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                mapperListener.stop();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">                log.warn(sm.getString(<span class="string">"standardService.mapperListener.stopFailed"</span>), e);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                mapperListener.start();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">                log.warn(sm.getString(<span class="string">"standardService.mapperListener.startFailed"</span>), e);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (oldEngine != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    oldEngine.stop();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">                    log.warn(sm.getString(<span class="string">"standardService.engine.stopFailed"</span>), e);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">​</span><br><span class="line">        <span class="comment">// Report this property change to interested listeners</span></span><br><span class="line">        support.firePropertyChange(<span class="string">"container"</span>, oldEngine, <span class="keyword">this</span>.engine);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>这段代码很简单，其实就是先判断当前的这个 Service 有没有已经关联了 Container，如果已经关联了，那么去掉这个关联关系—— oldContainer.setService(null)。如果这个 oldContainer 已经被启动了，结束它的生命周期。然后再替换新的关联、再初始化并开始这个新的 Container 的生命周期。最后将这个过程通知感兴趣的事件监听程序。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addConnector</span><span class="params">(Connector connector)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (connectorsLock) &#123;</span><br><span class="line">        connector.setService(<span class="keyword">this</span>);</span><br><span class="line">        Connector results[] = <span class="keyword">new</span> Connector[connectors.length + <span class="number">1</span>];</span><br><span class="line">        System.arraycopy(connectors, <span class="number">0</span>, results, <span class="number">0</span>, connectors.length);</span><br><span class="line">        results[connectors.length] = connector;</span><br><span class="line">        connectors = results;</span><br><span class="line">        <span class="keyword">if</span> (getState().isAvailable()) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                connector.start();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">              log.error(sm.getString(</span><br><span class="line">                        <span class="string">"standardService.connector.startFailed"</span>,connector), e);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// Report this property change to interested listeners</span></span><br><span class="line">            support.firePropertyChange(<span class="string">"connector"</span>, <span class="keyword">null</span>, connector);</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面是 addConnector 方法，这个方法也很简单，首先是设置关联关系，然后是初始化工作，开始新的生命周期。这里值得一提的是，注意 Connector 用的是数组而不是 List 集合，这个从性能角度考虑可以理解，有趣的是这里用了数组但是并没有向我们平常那样，一开始就分配一个固定大小的数组，它这里的实现机制是：重新创建一个当前大小的数组对象，然后将原来的数组对象 copy 到新的数组中，这种方式实现了类似的动态数组的功能，这种实现方式，值得我们以后拿来借鉴。</p>
+<h2 id="Server"><a href="#Server" class="headerlink" title="Server"></a>Server</h2><p>在我们日常开发中，一个小组组成了一个service，那么小组又依赖于什么存在呢？当然是部门或者公司，我们姑且此处假定为部门，试想一下，部门都不存在了，那我们这个小Team还会存在吗？皮之不存毛将焉附！<br>显然，servcie需要一个赖以生存的地方，需要一块可以生长的土壤，那么这块土壤就是Server！当然server提供了可以给很多service提供这块土壤，类比我们工作中，一个部门有着很多很多小的Team！<br>Server 要完成的任务很简单，就是要能够提供一个接口让其它程序能够访问到这个 Service 集合、同时要维护它所包含的所有 Service 的生命周期，包括如何初始化、如何结束服务、如何找到别人要访问的 Service。</p>
+<p>它的标准实现类 StandardServer 实现了上面这些方法，同时也实现了LifecycleMBeanBase 类，下面主要看一下 StandardServer 重要的一个方法 addService 的实现：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addService</span><span class="params">(Service service)</span> </span>&#123;</span><br><span class="line">    service.setServer(<span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">synchronized</span> (servicesLock) &#123;</span><br><span class="line">        Service results[] = <span class="keyword">new</span> Service[services.length + <span class="number">1</span>];</span><br><span class="line">        System.arraycopy(services, <span class="number">0</span>, results, <span class="number">0</span>, services.length);</span><br><span class="line">        results[services.length] = service;</span><br><span class="line">        services = results;</span><br><span class="line">        <span class="keyword">if</span> (getState().isAvailable()) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                service.start();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">                <span class="comment">// Ignore</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// Report this property change to interested listeners</span></span><br><span class="line">        support.firePropertyChange(<span class="string">"service"</span>, <span class="keyword">null</span>, service);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>从上面第一句就知道了 Service 和 Server 是相互关联的，Server 也是和 Service 管理 Connector 一样管理它，也是将 Service 放在一个数组中，后面部分的代码也是管理这个新加进来的 Service 的生命周期。</p>
+<h2 id="组件的生命线“Lifecycle”"><a href="#组件的生命线“Lifecycle”" class="headerlink" title="组件的生命线“Lifecycle”"></a>组件的生命线“Lifecycle”</h2><p>前面一直在说 Service 和 Server 管理它下面组件的生命周期，那它们是如何管理的呢？<br>Tomcat 中组件的生命周期是通过 Lifecycle 接口来控制的，组件只要继承这个接口并实现其中的方法就可以统一被拥有它的组件控制了，这样一层一层的直到一个最高级的组件就可以控制 Tomcat 中所有组件的生命周期，这个最高的组件就是 Server，而控制 Server 的是 Startup，也就是您启动和关闭 Tomcat。<br>下面是 Lifecycle 接口的类结构图：<br><img src="/2020/03/19/tomcat源码分析/tomcat-lifecycle.png" alt="avatar"></p>
+<p>除了控制生命周期的 Start 和 Stop 方法外还有一个监听机制，在生命周期开始和结束的时候做一些额外的操作。这个机制在其它的框架中也被使用，如在 Spring 中。关于这个设计模式会在后面介绍。</p>
+<p>Lifecycle 接口的方法的实现都在其它组件中被调用，就像前面中说的，组件的生命周期由包含它的父组件控制，所以它的 Start 方法自然就是调用它下面的组件的 Start 方法，Stop 方法也是一样。如在 Server 中 Start 方法就会调用 Service 组件的 Start 方法。<br>Server 的 Start 方法代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">startInternal</span><span class="params">()</span> <span class="keyword">throws</span> LifecycleException </span>&#123;</span><br><span class="line">    fireLifecycleEvent(CONFIGURE_START_EVENT, <span class="keyword">null</span>);</span><br><span class="line">    setState(LifecycleState.STARTING);</span><br><span class="line">    globalNamingResources.start();</span><br><span class="line">    <span class="comment">// Start our defined Services</span></span><br><span class="line">    <span class="keyword">synchronized</span> (servicesLock) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; services.length; i++) &#123;</span><br><span class="line">            services[i].start();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>监听的代码会包围 Service 组件的启动过程，就是简单的循环启动所有 Service 组件的 Start 方法，但是所有 Service 必须要实现 Lifecycle 接口，这样做会更加灵活。<br>Server 的 Stop 方法代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">stopInternal</span><span class="params">()</span> <span class="keyword">throws</span> LifecycleException </span>&#123;</span><br><span class="line">    setState(LifecycleState.STOPPING);</span><br><span class="line">    fireLifecycleEvent(CONFIGURE_STOP_EVENT, <span class="keyword">null</span>);</span><br><span class="line">    <span class="comment">// Stop our defined Services</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; services.length; i++) &#123;</span><br><span class="line">        services[i].stop();</span><br><span class="line">    &#125;</span><br><span class="line">    globalNamingResources.stop();</span><br><span class="line">    stopAwait();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>它所要做的事情也和 Start 方法差不多。</p>
+<h2 id="Connector-组件"><a href="#Connector-组件" class="headerlink" title="Connector 组件"></a>Connector 组件</h2><p>Connector 组件是 Tomcat 中两个核心组件之一，它的主要任务是负责接收web服务器的发过来的 tcp 连接请求，创建一个 Request 和 Response 对象分别用于和请求端交换数据，然后会把产生的 Request 和 Response 对象传给处理这个请求的线程，处理这个请求的线程就是 Container 组件要做的事了。</p>
+<p>由于这个过程比较复杂，大体的流程可以用下面的顺序图来解释：<br><img src="/2020/03/19/tomcat源码分析/tomcat-connector.png" alt="avatar"></p>
+<p>Tomcat 中默认的 Connector 是 Coyote框架，这个 Connector 是可以选择替换的。Connector 最重要的功能就是接收连接请求然后分配线程让 Container 来处理这个请求，所以这必然是多线程的, Connector 划分成 Processor、Protocol, 另外 Coyote 也定义自己的 Request 和 Response 对象。<br>先看一下 Connector 的主要类图：<br><img src="/2020/03/19/tomcat源码分析/tomcat-connector-class.png" alt="avatar"></p>
+<p>ProtocolHandler start<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (getLog().isInfoEnabled()) &#123;</span><br><span class="line">        getLog().info(sm.getString(<span class="string">"abstractProtocolHandler.start"</span>, getName()));</span><br><span class="line">    &#125;</span><br><span class="line">    endpoint.start();</span><br><span class="line">    <span class="comment">// Start async timeout thread</span></span><br><span class="line">    asyncTimeout = <span class="keyword">new</span> AsyncTimeout();</span><br><span class="line">    Thread timeoutThread = <span class="keyword">new</span> Thread(asyncTimeout, getNameInternal() + <span class="string">"-AsyncTimeout"</span>);</span><br><span class="line">    <span class="keyword">int</span> priority = endpoint.getThreadPriority();</span><br><span class="line">    <span class="keyword">if</span> (priority &lt; Thread.MIN_PRIORITY || priority &gt; Thread.MAX_PRIORITY) &#123;</span><br><span class="line">        priority = Thread.NORM_PRIORITY;</span><br><span class="line">    &#125;</span><br><span class="line">    timeoutThread.setPriority(priority);</span><br><span class="line">    timeoutThread.setDaemon(<span class="keyword">true</span>);</span><br><span class="line">    timeoutThread.start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>timeoutThread.start()执行就会进入等待请求的状态，直到一个新的请求到来才会激活它继续执行,当有新的请求进来的时候NioEndpoint回调用ProtocolHandler的process方法<br>NioEndpoint 的init方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">initServerSocket</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    serverSock = ServerSocketChannel.open();</span><br><span class="line">    socketProperties.setProperties(serverSock.socket());</span><br><span class="line">    InetSocketAddress addr = (getAddress()!=<span class="keyword">null</span>?<span class="keyword">new</span> InetSocketAddress(getAddress(),getPort()):<span class="keyword">new</span> InetSocketAddress(getPort()));</span><br><span class="line">    serverSock.socket().bind(addr,getAcceptCount());</span><br><span class="line">    serverSock.configureBlocking(<span class="keyword">true</span>); <span class="comment">//mimic APR behavior</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>Processor组件提供了对协议通信的处理，包括对套接字的读取过滤、对协议的解析并封装成请求对象、响应对象的生成、套接字的过滤写入等等操作!<br>当 Connector 将 socket 连接封装成 request 和 response 对象后接下来的事情就交给 Container 来处理了。</p>
+<h2 id="Container"><a href="#Container" class="headerlink" title="Container"></a>Container</h2><p>Container 是容器的父接口，所有子容器都必须实现这个接口，Container 容器的设计用的是典型的责任链的设计模式，它有四个子容器组件构成，分别是：Engine、Host、Context、Wrapper，这四个组件在结构上是平行的，而在逻辑上是父子关系，在处理过程中，Engine 包含 Host,Host 包含 Context，Context 包含 Wrapper。<br>我们在web项目中的一个Servlet类对应一个Wrapper，多个Servlet就对应多个Wrapper，当有多个Wrapper的时候就需要一个容器来管理这些Wrapper了，这就是Context容器了，Context容器对应一个工程，所以我们新部署一个工程到Tomcat中就会新创建一个Context容器，Context 通常就是对应下面这个配置：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Server.xml</span><br><span class="line"><span class="tag">&lt;<span class="name">Context</span>      <span class="attr">path</span>=<span class="string">"/library"</span>     <span class="attr">docBase</span>=<span class="string">"D:\projects\library\deploy\target\library.war"</span>      <span class="attr">reloadable</span>=<span class="string">"true"</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<p>容器的总体设计<br>Context 还可以定义在父容器 Host 中，Host 不是必须的，但是要运行 war 程序，就必须要 Host，因为 war 中必有 web.xml 文件，这个文件的解析就需要 Host 了，如果要有多个 Host 就要定义一个 top 容器 Engine 了。而 Engine 没有父容器了，一个 Engine 代表一个完整的 Servlet 引擎。<br>那么这些容器是如何协同工作的呢？先看一下它们之间的关系图：<br>四个容器的关系图<br><img src="/2020/03/19/tomcat源码分析/tomcat-context.png" alt="avatar"></p>
+<p>当 Connector 接受到一个连接请求时，将请求交给 Container，Container 是如何处理这个请求的？这四个组件是怎么分工的，怎么把请求传给特定的子容器的呢？又是如何将最终的请求交给 Servlet 处理。下面是这个过程的时序图：<br>Engine 和 Host 处理请求的时序图<br><img src="/2020/03/19/tomcat源码分析/tomcat-servlet.png" alt="avatar"></p>
+<p>这里看到了 Valve 是不是很熟悉，没错 Valve 的设计在其他框架中也有用的，同样 Pipeline 的原理也基本是相似的，它是一个管道，Engine 和 Host 都会执行这个 Pipeline，您可以在这个管道上增加任意的 Valve，Tomcat 会挨个执行这些 Valve，而且四个组件都会有自己的一套 Valve 集合。您怎么才能定义自己的 Valve 呢？在 server.xml 文件中可以添加，如给 Engine 和 Host 增加一个 Valve 如下：<br>Server.xml<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Engine</span> <span class="attr">defaultHost</span>=<span class="string">"localhost"</span> <span class="attr">name</span>=<span class="string">"Catalina"</span>&gt;</span></span><br><span class="line">​</span><br><span class="line">    <span class="tag">&lt;<span class="name">Valve</span> <span class="attr">className</span>=<span class="string">"org.apache.catalina.valves.RequestDumperValve"</span>/&gt;</span></span><br><span class="line">    ………</span><br><span class="line">    <span class="tag">&lt;<span class="name">Host</span> <span class="attr">appBase</span>=<span class="string">"webapps"</span> <span class="attr">autoDeploy</span>=<span class="string">"true"</span> <span class="attr">name</span>=<span class="string">"localhost"</span> <span class="attr">unpackWARs</span>=<span class="string">"true"</span> </span></span><br><span class="line"><span class="tag">      <span class="attr">xmlNamespaceAware</span>=<span class="string">"false"</span> <span class="attr">xmlValidation</span>=<span class="string">"false"</span>&gt;</span></span><br><span class="line">​</span><br><span class="line">        <span class="tag">&lt;<span class="name">Valve</span> <span class="attr">className</span>=<span class="string">"org.apache.catalina.valves.FastCommonAccessLogValve"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">directory</span>=<span class="string">"logs"</span>  <span class="attr">prefix</span>=<span class="string">"localhost_access_log."</span> <span class="attr">suffix</span>=<span class="string">".txt"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">pattern</span>=<span class="string">"common"</span> <span class="attr">resolveHosts</span>=<span class="string">"false"</span>/&gt;</span>    </span><br><span class="line">    …………</span><br><span class="line">    <span class="tag">&lt;/<span class="name">Host</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Engine</span>&gt;</span></span><br><span class="line">``` </span><br><span class="line">StandardEngineValve 和 StandardHostValve 是 Engine 和 Host 的默认的 Valve，它们是最后一个 Valve 负责将请求传给它们的子容器，以继续往下执行。</span><br><span class="line">前面是 Engine 和 Host 容器的请求过程，下面看 Context 和 Wrapper 容器时如何处理请求的。下面是处理请求的时序图：</span><br><span class="line">Context 和 wrapper 的处理请求时序图</span><br><span class="line">![avatar](tomcat-wrap.png)</span><br><span class="line">从 Tomcat5 开始，子容器的路由放在了 request 中，request 中保存了当前请求正在处理的 Host、Context 和 wrapper。</span><br><span class="line">## Engine 容器</span><br><span class="line">Engine 容器比较简单，它只定义了一些基本的关联关系，其管理的容器是Host，Engine是一个接口，接口类图如下：</span><br><span class="line">Engine 接口的类结构</span><br><span class="line">![avatar](tomcat-engine.png)</span><br><span class="line"></span><br><span class="line">它的标准实现类是 StandardEngine，这个类注意一点就是 Engine 没有父容器了，如果调用 setParent 方法时将会报错。添加子容器也只能是 Host 类型的，代码如下：</span><br><span class="line">StandardEngine. addChild</span><br><span class="line">``` java</span><br><span class="line">public void addChild(Container child) &#123;</span><br><span class="line">    if (!(child instanceof Host))</span><br><span class="line">        throw new IllegalArgumentException</span><br><span class="line">            (sm.getString("standardEngine.notHost"));</span><br><span class="line">    super.addChild(child);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public void setParent(Container container) &#123;</span><br><span class="line">    throw new IllegalArgumentException</span><br><span class="line">        (sm.getString("standardEngine.notParent"));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>它的初始化方法也就是初始化和它相关联的组件，以及一些事件的监听。</p>
+<h2 id="Host-容器"><a href="#Host-容器" class="headerlink" title="Host 容器"></a>Host 容器</h2><p>Host容器是Engine容器的子容器，上面也说到Host是受Engine容器管理的，就是指一个虚拟主机，比如我们在访问具体jsp页面URL中localhost就是一个虚拟主机，其作用是运行多个应用，并对这些应用进行管理，其子容器是Context，而且一个主机还保存了主机的相关信息。Host的标准实现类是StandardHost，其闸门实现是StandardHostValve，下面是StandardHost与StandardHostValve的类结构图<br>下面是和 Host 相关的类关联图：<br><img src="/2020/03/19/tomcat源码分析/tomcat-host.png" alt="avatar"></p>
+<h2 id="Context-容器"><a href="#Context-容器" class="headerlink" title="Context 容器"></a>Context 容器</h2><p>Context容器是一个Web项目的代表，主要管理Servlet实例，在Tomcat中Servlet实例是以Wrapper出现的，Context启动的过程就是加载个类资源文件以及打开子容器以及Pipeline管道的过程。启动Context容器后，就可以处理具体的请求了，具体是通过Request对象。<br>那么Context调用invoke方法后又发生什么了呢？具体执行的是org.apache.catalina.core.StandardContextValve的invoke方法。相当于进入了Context管道中，要开始通过管道中一个个闸门了。<br>Context 准备 Servlet 的运行环境是在 Start 方法开始的，这个方法的代码片段如下：<br>StandardContext.start<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span> LifecycleException </span>&#123;</span><br><span class="line">    ………</span><br><span class="line">    <span class="keyword">if</span>( !initialized ) &#123; </span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            init();</span><br><span class="line">        &#125; <span class="keyword">catch</span>( Exception ex ) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> LifecycleException(<span class="string">"Error initializaing "</span>, ex);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">  ………</span><br><span class="line">    lifecycle.fireLifecycleEvent(BEFORE_START_EVENT, <span class="keyword">null</span>);</span><br><span class="line">    setAvailable(<span class="keyword">false</span>);</span><br><span class="line">    setConfigured(<span class="keyword">false</span>);</span><br><span class="line">    <span class="keyword">boolean</span> ok = <span class="keyword">true</span>;</span><br><span class="line">    File configBase = getConfigBase();</span><br><span class="line">    <span class="keyword">if</span> (configBase != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (getConfigFile() == <span class="keyword">null</span>) &#123;</span><br><span class="line">            File file = <span class="keyword">new</span> File(configBase, getDefaultConfigFile());</span><br><span class="line">            setConfigFile(file.getPath());</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                File appBaseFile = <span class="keyword">new</span> File(getAppBase());</span><br><span class="line">                <span class="keyword">if</span> (!appBaseFile.isAbsolute()) &#123;</span><br><span class="line">                    appBaseFile = <span class="keyword">new</span> File(engineBase(), getAppBase());</span><br><span class="line">                &#125;</span><br><span class="line">                String appBase = appBaseFile.getCanonicalPath();</span><br><span class="line">                String basePath = </span><br><span class="line">                    (<span class="keyword">new</span> File(getBasePath())).getCanonicalPath();</span><br><span class="line">                <span class="keyword">if</span> (!basePath.startsWith(appBase)) &#123;</span><br><span class="line">                    Server server = ServerFactory.getServer();</span><br><span class="line">                    ((StandardServer) server).storeContext(<span class="keyword">this</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                log.warn(<span class="string">"Error storing config file"</span>, e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                String canConfigFile =  (<span class="keyword">new</span> File(getConfigFile())).getCanonicalPath();</span><br><span class="line">                <span class="keyword">if</span> (!canConfigFile.startsWith (configBase.getCanonicalPath())) &#123;</span><br><span class="line">                    File file = <span class="keyword">new</span> File(configBase, getDefaultConfigFile());</span><br><span class="line">                    <span class="keyword">if</span> (copy(<span class="keyword">new</span> File(canConfigFile), file)) &#123;</span><br><span class="line">                        setConfigFile(file.getPath());</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                log.warn(<span class="string">"Error setting config file"</span>, e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">​</span><br><span class="line">    ………</span><br><span class="line">    Container children[] = findChildren();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; children.length; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (children[i] <span class="keyword">instanceof</span> Lifecycle)</span><br><span class="line">            ((Lifecycle) children[i]).start();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">  <span class="keyword">if</span> (pipeline <span class="keyword">instanceof</span> Lifecycle)</span><br><span class="line">        ((Lifecycle) pipeline).start();</span><br><span class="line">    ………</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>它主要是设置各种资源属性和管理组件，还有非常重要的就是启动子容器和 Pipeline。<br>我们知道 Context 的配置文件中有个 reloadable 属性，如下面配置：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">server.xml</span><br><span class="line"><span class="tag">&lt;<span class="name">Context</span>      <span class="attr">path</span>=<span class="string">"/library"</span>      <span class="attr">docBase</span>=<span class="string">"D:\projects\library\deploy\target\library.war"</span>      <span class="attr">reloadable</span>=<span class="string">"true"</span>  /&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>当这个 reloadable 设为 true 时，war 被修改后 Tomcat 会自动的重新加载这个应用。如何做到这点的呢 ? 这个功能是在 StandardContext 的 backgroundProcess 方法中实现的，这个方法的代码如下：<br>StandardContext. backgroundProcess<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">backgroundProcess</span><span class="params">()</span> </span>&#123;</span><br><span class="line">​</span><br><span class="line">        <span class="keyword">if</span> (!getState().isAvailable())</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">​</span><br><span class="line">        Loader loader = getLoader();</span><br><span class="line">        <span class="keyword">if</span> (loader != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                loader.backgroundProcess();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                log.warn(sm.getString(</span><br><span class="line">                        <span class="string">"standardContext.backgroundProcess.loader"</span>, loader), e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        Manager manager = getManager();</span><br><span class="line">        <span class="keyword">if</span> (manager != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                manager.backgroundProcess();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                log.warn(sm.getString(</span><br><span class="line">                        <span class="string">"standardContext.backgroundProcess.manager"</span>, manager),</span><br><span class="line">                        e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        WebResourceRoot resources = getResources();</span><br><span class="line">        <span class="keyword">if</span> (resources != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                resources.backgroundProcess();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                log.warn(sm.getString(</span><br><span class="line">                        <span class="string">"standardContext.backgroundProcess.resources"</span>,</span><br><span class="line">                        resources), e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        InstanceManager instanceManager = getInstanceManager();</span><br><span class="line">        <span class="keyword">if</span> (instanceManager != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                instanceManager.backgroundProcess();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                log.warn(sm.getString(</span><br><span class="line">                        <span class="string">"standardContext.backgroundProcess.instanceManager"</span>,</span><br><span class="line">                        resources), e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">super</span>.backgroundProcess();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>它会调用 reload 方法，而 reload 方法会先调用 stop 方法然后再调用 Start 方法，完成 Context 的一次重新加载。可以看出执行 reload 方法的条件是 reloadable 为 true 和应用被修改，那么这个 backgroundProcess 方法是怎么被调用的呢？<br>这个方法是在 ContainerBase 类中定义的内部类 ContainerBackgroundProcessor 被周期调用的(1s)，这个类是运行在一个后台线程中，它会周期的执行 run 方法，它的 run 方法会周期调用所有容器的 backgroundProcess 方法，因为所有容器都会继承 ContainerBase 类，所以所有容器都能够在 backgroundProcess 方法中定义周期执行的事件。</p>
+<h2 id="Wrapper-容器"><a href="#Wrapper-容器" class="headerlink" title="Wrapper 容器"></a>Wrapper 容器</h2><p>Wrapper 代表一个 Servlet，它负责管理一个 Servlet，包括的 Servlet 的装载、初始化、执行以及资源回收。Wrapper 是最底层的容器，它没有子容器了，所以调用它的 addChild 将会报错。<br>Wrapper 的实现类是 StandardWrapper，StandardWrapper 还实现了拥有一个 Servlet 初始化信息的 ServletConfig，由此看出 StandardWrapper 将直接和 Servlet 的各种信息打交道。<br>下面看一下非常重要的一个方法 loadServlet，如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> Servlet <span class="title">loadServlet</span><span class="params">()</span> <span class="keyword">throws</span> ServletException </span>&#123;</span><br><span class="line">​</span><br><span class="line">        <span class="comment">// Nothing to do if we already have an instance or an instance pool</span></span><br><span class="line">        <span class="keyword">if</span> (!singleThreadModel &amp;&amp; (instance != <span class="keyword">null</span>))</span><br><span class="line">            <span class="keyword">return</span> instance;</span><br><span class="line">​</span><br><span class="line">        PrintStream out = System.out;</span><br><span class="line">        <span class="keyword">if</span> (swallowOutput) &#123;</span><br><span class="line">            SystemLogHandler.startCapture();</span><br><span class="line">        &#125;</span><br><span class="line">​</span><br><span class="line">        Servlet servlet;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">long</span> t1=System.currentTimeMillis();</span><br><span class="line">            <span class="comment">// Complain if no servlet class has been specified</span></span><br><span class="line">            <span class="keyword">if</span> (servletClass == <span class="keyword">null</span>) &#123;</span><br><span class="line">                unavailable(<span class="keyword">null</span>);</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> ServletException</span><br><span class="line">                    (sm.getString(<span class="string">"standardWrapper.notClass"</span>, getName()));</span><br><span class="line">            &#125;</span><br><span class="line">​</span><br><span class="line">            InstanceManager instanceManager = ((StandardContext)getParent()).getInstanceManager();</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                servlet = (Servlet) instanceManager.newInstance(servletClass);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (ClassCastException e) &#123;</span><br><span class="line">                unavailable(<span class="keyword">null</span>);</span><br><span class="line">                <span class="comment">// Restore the context ClassLoader</span></span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> ServletException</span><br><span class="line">                    (sm.getString(<span class="string">"standardWrapper.notServlet"</span>, servletClass), e);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">                e = ExceptionUtils.unwrapInvocationTargetException(e);</span><br><span class="line">                ExceptionUtils.handleThrowable(e);</span><br><span class="line">                unavailable(<span class="keyword">null</span>);</span><br><span class="line">​</span><br><span class="line">                <span class="comment">// Added extra log statement for Bugzilla 36630:</span></span><br><span class="line">                <span class="comment">// http://bz.apache.org/bugzilla/show_bug.cgi?id=36630</span></span><br><span class="line">                <span class="keyword">if</span>(log.isDebugEnabled()) &#123;</span><br><span class="line">                    log.debug(sm.getString(<span class="string">"standardWrapper.instantiate"</span>, servletClass), e);</span><br><span class="line">                &#125;</span><br><span class="line">​</span><br><span class="line">                <span class="comment">// Restore the context ClassLoader</span></span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> ServletException</span><br><span class="line">                    (sm.getString(<span class="string">"standardWrapper.instantiate"</span>, servletClass), e);</span><br><span class="line">            &#125;</span><br><span class="line">​</span><br><span class="line">            <span class="keyword">if</span> (multipartConfigElement == <span class="keyword">null</span>) &#123;</span><br><span class="line">                MultipartConfig annotation =</span><br><span class="line">                        servlet.getClass().getAnnotation(MultipartConfig.class);</span><br><span class="line">                <span class="keyword">if</span> (annotation != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    multipartConfigElement =</span><br><span class="line">                            <span class="keyword">new</span> MultipartConfigElement(annotation);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">​</span><br><span class="line">            <span class="comment">// Special handling for ContainerServlet instances</span></span><br><span class="line">            <span class="comment">// Note: The InstanceManager checks if the application is permitted</span></span><br><span class="line">            <span class="comment">//       to load ContainerServlets</span></span><br><span class="line">            <span class="keyword">if</span> (servlet <span class="keyword">instanceof</span> ContainerServlet) &#123;</span><br><span class="line">                ((ContainerServlet) servlet).setWrapper(<span class="keyword">this</span>);</span><br><span class="line">            &#125;</span><br><span class="line">​</span><br><span class="line">            classLoadTime=(<span class="keyword">int</span>) (System.currentTimeMillis() -t1);</span><br><span class="line">​</span><br><span class="line">            <span class="keyword">if</span> (servlet <span class="keyword">instanceof</span> SingleThreadModel) &#123;</span><br><span class="line">                <span class="keyword">if</span> (instancePool == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    instancePool = <span class="keyword">new</span> Stack&lt;&gt;();</span><br><span class="line">                &#125;</span><br><span class="line">                singleThreadModel = <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">​</span><br><span class="line">            initServlet(servlet);</span><br><span class="line">​</span><br><span class="line">            fireContainerEvent(<span class="string">"load"</span>, <span class="keyword">this</span>);</span><br><span class="line">​</span><br><span class="line">            loadTime=System.currentTimeMillis() -t1;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (swallowOutput) &#123;</span><br><span class="line">                String log = SystemLogHandler.stopCapture();</span><br><span class="line">                <span class="keyword">if</span> (log != <span class="keyword">null</span> &amp;&amp; log.length() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (getServletContext() != <span class="keyword">null</span>) &#123;</span><br><span class="line">                        getServletContext().log(log);</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        out.println(log);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> servlet;</span><br><span class="line">​</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>该类主要负责初始化一个Servlet实例，并调用该实例的init方法，然后通知感兴趣的事件监听程序。<br>loadServlet()的调用链如下：<br><img src="/2020/03/19/tomcat源码分析/tomcat-loadservlet.png" alt="avatar"></p>
+<p>可以看出在调用allocate的loadServlet方法的时候调用了StandardWrapperValve的invoke方法，在Wrapper容器获得请求后，通过allocate方法从实例池栈中弹出一个servlet实例来处理这个请求，servlet实例被封装成filterChain对象，紧接着通过一系列的过滤器过滤到达servlet.service()方法。<br>invoke方法执行过程：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">初始化一些本地变量</span><br><span class="line">判断当前应用是否可用，就是判断是否确实有这个项目</span><br><span class="line">分配一个Servlet实例</span><br><span class="line">为请求创建一个过滤器链</span><br><span class="line">过滤器过滤请求</span><br><span class="line">关闭过滤器</span><br><span class="line">重新委派原来委派的Servlet实例</span><br><span class="line">释放资源</span><br></pre></td></tr></table></figure></p>
+<h2 id="coyote框架"><a href="#coyote框架" class="headerlink" title="coyote框架"></a>coyote框架</h2><p>AbstractProtocol-&gt;AbstractProcessorLight-&gt;Http11Processor-&gt;CoyoteAdapter</p>
+<h1 id="请求流程"><a href="#请求流程" class="headerlink" title="请求流程"></a>请求流程</h1><h2 id="启动过程"><a href="#启动过程" class="headerlink" title="启动过程"></a>启动过程</h2><p>启动脚本catalina.sh，在catalina.sh中，可以看出tomcat的启动是调用了bootstarp的main方法，main方法中初始化资源，加载class，初始化catlina类，为catlina类set父类加载器parentClassLoader在main方法中有两个很重要的方法，daemon.load(args)和daemon.start(); daemon.load(args)主要还是调用了catalina中的load方法，此方法中负责加载server.xml文件，并通过digester.parse(inputSource)来初始化各个文件,包括很重要的初始化server，service，connector，以及各个contair(host,engine, context,wrap)。然后调用 getServer().init()初始化各个属性和依赖，比如coyote框架。而daemon.start()同样也调用的是catalina的start方法，此方法最重要的就是启动connect，用来监听servlet请求.</p>
+<h2 id="请求处理"><a href="#请求处理" class="headerlink" title="请求处理"></a>请求处理</h2><p><img src="/2020/03/19/tomcat源码分析/tomcat-request.png" alt="avatar"></p>
+<h3 id="代码描述"><a href="#代码描述" class="headerlink" title="代码描述"></a>代码描述</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Acceptor.run()监听请求,获取socket</span><br><span class="line">Nio2EnEndpEndpoint.setSocketOptions(AsynchronousSocketChannel socket)</span><br><span class="line">Nio2EnEndpEndpoint.SocketProcessorBase&lt;Nio2Channel&gt; createSocketProcessor.duRun</span><br><span class="line">abstractProProtocol.process，  Processor processor = connections.get(socket);</span><br><span class="line">AbstractProcessorLight.state = dispatch(nextDispatch.getSocketStatus());   process</span><br><span class="line"><span class="function">http11Processor  <span class="title">service</span><span class="params">(SocketWrapperBase&lt;?&gt; socketWrapper)</span>   解析请求信息  inputBuffer.<span class="title">init</span><span class="params">(socketWrapper)</span></span>;</span><br><span class="line"><span class="function">coyoteAdapter  <span class="title">asyncDispatch</span><span class="params">(org.apache.coyote.Request req, org.apache.coyote.Response res,SocketEvent status)</span></span></span><br><span class="line"><span class="function">connector.<span class="title">getService</span><span class="params">()</span>.<span class="title">getContainer</span><span class="params">()</span>.<span class="title">getPipeline</span><span class="params">()</span>.<span class="title">getFirst</span><span class="params">()</span>.<span class="title">invoke</span><span class="params">(request, response)</span></span>;</span><br><span class="line"><span class="function">standardEngineValve <span class="title">invoke</span><span class="params">(Request request, Response response)</span></span></span><br><span class="line"><span class="function">StandardHostValve.getContext.getWrap</span></span><br><span class="line"><span class="function">wrapValve servlet </span>= wrapper.allocate();</span><br><span class="line">StandardWrapper.allocate()</span><br><span class="line"></span><br><span class="line">ApplicationFilterChain filterChain = ApplicationFilterFactory.createFilterChain(request, wrapper, servlet);</span><br><span class="line">ilterChain.doFilter(request.getRequest(),response.getResponse());</span><br><span class="line">filterChain.release();</span><br></pre></td></tr></table></figure>
+<p><img src="/2020/03/19/tomcat源码分析/tomcat-request2.png" alt="avatar"></p>
+<h3 id="流程描述"><a href="#流程描述" class="headerlink" title="流程描述"></a>流程描述</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">请求被发送到本机端口8080，被在那里侦听的Coyote HTTP/1.1 Connector获得</span><br><span class="line">Connector把该请求交给它所在的Service的Engine来处理，并等待来自Engine的回应 </span><br><span class="line">Engine获得请求localhost/项目/页面.jsp，匹配它所拥有的所有虚拟主机Host </span><br><span class="line">Engine匹配到名为localhost的Host（即使匹配不到也把请求交给该Host处理，因为该Host被定义为该Engine的默认主机） </span><br><span class="line">localhost Host获得请求/项目/页面.jsp，匹配它所拥有的所有Context </span><br><span class="line">Host匹配到路径为/项目的Context（如果匹配不到就把该请求交给路径名为””的Context去处理） </span><br><span class="line">path=”/项目”的Context获得请求/页面.jsp，在它的mapping table中寻找对应的servlet </span><br><span class="line">Context匹配到URL PATTERN为*.jsp的servlet，对应于JspServlet类 </span><br><span class="line">构造HttpServletRequest对象和HttpServletResponse对象，作为参数调用JspServlet的doGet或doPost方法 </span><br><span class="line">Context把执行完了之后的HttpServletResponse对象返回给Host </span><br><span class="line">Host把HttpServletResponse对象返回给Engine </span><br><span class="line">Engine把HttpServletResponse对象返回给Connector </span><br><span class="line">Connector把HttpServletResponse对象返回给客户browser</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/databus/" rel="tag"># databus</a>
+          
+            <a href="/tags/binlog/" rel="tag"># binlog</a>
+          
+            <a href="/tags/教程/" rel="tag"># 教程</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/03/18/分布式锁/" rel="next" title="分布式锁实现方式">
+                <i class="fa fa-chevron-left"></i> 分布式锁实现方式
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/03/24/DDD入门/" rel="prev" title="DDD入门">
+                DDD入门 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">WDB</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">17</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">30</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#基本概念"><span class="nav-number">1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总体架构"><span class="nav-number">2.</span> <span class="nav-text">总体架构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Service"><span class="nav-number">2.1.</span> <span class="nav-text">Service</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Server"><span class="nav-number">2.2.</span> <span class="nav-text">Server</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#组件的生命线“Lifecycle”"><span class="nav-number">2.3.</span> <span class="nav-text">组件的生命线“Lifecycle”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Connector-组件"><span class="nav-number">2.4.</span> <span class="nav-text">Connector 组件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Container"><span class="nav-number">2.5.</span> <span class="nav-text">Container</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Host-容器"><span class="nav-number">2.6.</span> <span class="nav-text">Host 容器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Context-容器"><span class="nav-number">2.7.</span> <span class="nav-text">Context 容器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Wrapper-容器"><span class="nav-number">2.8.</span> <span class="nav-text">Wrapper 容器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#coyote框架"><span class="nav-number">2.9.</span> <span class="nav-text">coyote框架</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#请求流程"><span class="nav-number">3.</span> <span class="nav-text">请求流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#启动过程"><span class="nav-number">3.1.</span> <span class="nav-text">启动过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#请求处理"><span class="nav-number">3.2.</span> <span class="nav-text">请求处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#代码描述"><span class="nav-number">3.2.1.</span> <span class="nav-text">代码描述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#流程描述"><span class="nav-number">3.2.2.</span> <span class="nav-text">流程描述</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">WDB</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/schemes/muse.js?v=7.0.1"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

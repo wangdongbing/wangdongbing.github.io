@@ -342,7 +342,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2020/03/18/线程/">
+    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2020/03/24/DDD入门/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="WDB">
@@ -362,7 +362,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2020/03/18/线程/" class="post-title-link" itemprop="url">日常疑问随写</a>
+                <a href="/2020/03/24/DDD入门/" class="post-title-link" itemprop="url">DDD入门</a>
               
             
           </h1>
@@ -387,12 +387,24 @@
                 
               
 
-              <time title="创建时间：2020-03-18 17:51:23 / 修改时间：17:53:13" itemprop="dateCreated datePublished" datetime="2020-03-18T17:51:23+08:00">2020-03-18</time>
+              <time title="创建时间：2020-03-24 23:49:37" itemprop="dateCreated datePublished" datetime="2020-03-24T23:49:37+08:00">2020-03-24</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-03-25 00:05:26" itemprop="dateModified" datetime="2020-03-25T00:05:26+08:00">2020-03-25</time>
               
             
           </span>
@@ -409,7 +421,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/日常问题/" itemprop="url" rel="index"><span itemprop="name">日常问题</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/DDD/" itemprop="url" rel="index"><span itemprop="name">DDD</span></a></span>
 
                 
                 
@@ -445,11 +457,357 @@
 
       
         
-          <p>记录一些日常遇到的疑惑，偏重于小的知识点<br></p>
+          <p>DDD并不是一个新的概念，事实上，在十多年前，这一概念就被提出，只是没有得到广泛的应用而已，大家可以看下我们互联网系统的进化历程，应用从单体到微服务，数据从冷备热备到多活，开发方式从瀑布到敏捷，我们的系统变得更灵活，架构变得跟清晰扁平。但是我们只关注了系统层面的架构或者设计，而忽略了业务层面的设计，互联网的特点就是快，业务先跑起来再说，有问题以后再优化，再重构，结果就是业务越堆越多，架构越来越混乱，到最后谁都不敢再去重构这么一个臃肿的系统，这是我们在前期缺乏对业务的整体建模和思考的后果，尤其是对于复杂业务，这个时候大家开始寻求一种解决问题的方式，自然而然的将目光转向了DDD-领域驱动设计。<br></p>
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2020/03/18/线程/#more" rel="contents">
+              <a class="btn" href="/2020/03/24/DDD入门/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2020/03/19/tomcat源码分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="WDB">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好学习,天天向上">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2020/03/19/tomcat源码分析/" class="post-title-link" itemprop="url">tomcat源码分析</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-03-19 23:08:30 / 修改时间：23:56:09" itemprop="dateCreated datePublished" datetime="2020-03-19T23:08:30+08:00">2020-03-19</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/数据同步/" itemprop="url" rel="index"><span itemprop="name">数据同步</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h1><p><code>名称由来</code>：Tomcat最初是由Sun的软件构架师詹姆斯·邓肯·戴维森开发的。后来他帮助将其变为开源项目，并由Sun贡献给Apache软件基金会。由于大部分开源项目O’Reilly都会出一本相关的书，并且将其封面设计成某个动物的素描，因此他希望将此项目以一个动物的名字命名。因为他希望这种动物能够自己照顾自己，最终，他将其命名为Tomcat（英语公猫或其他雄性猫科动物）。而O’Reilly出版的介绍Tomcat的书籍（ISBN 0-596-00318-8）[1]的封面也被设计成了一个公猫的形象。而Tomcat的Logo兼吉祥物也被设计成了一只公猫。<br>Apache（Apache HTTP Server）只支持静态网页，但像php,cgi,jsp等动态网页就需要Tomcat来处理。 Tomcat是由Apache软件基金会下属的Jakarta项目开发的一个Servlet容器<br>Apache是web服务器，Tomcat是应用（java）服务器<br></p>
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/2020/03/19/tomcat源码分析/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2020/03/18/分布式锁/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="WDB">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好学习,天天向上">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2020/03/18/分布式锁/" class="post-title-link" itemprop="url">分布式锁实现方式</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-03-18 22:41:27" itemprop="dateCreated datePublished" datetime="2020-03-18T22:41:27+08:00">2020-03-18</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-03-19 22:55:30" itemprop="dateModified" datetime="2020-03-19T22:55:30+08:00">2020-03-19</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/分布式系统/" itemprop="url" rel="index"><span itemprop="name">分布式系统</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>分布式锁的实现方式有很多中，比较常用的有redis，zookeeper，数据库等，本文将介绍下常用的实现方案以及优缺点，首先分布式锁也和其他锁一样，有共享锁，有排他锁，共享锁的比较简单，本文将主要讨论排他锁的获取锁和释放锁过程<br></p>
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/2020/03/18/分布式锁/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -571,7 +929,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2020-03-18 00:36:18" itemprop="dateModified" datetime="2020-03-18T00:36:18+08:00">2020-03-18</time>
+                <time title="修改时间：2020-03-25 00:04:55" itemprop="dateModified" datetime="2020-03-25T00:04:55+08:00">2020-03-25</time>
               
             
           </span>
@@ -624,7 +982,7 @@
 
       
         
-          <p>本节将从databus源码角度分析整个流程和其中的原理细节<br></p>
+          <p>之前我们学习了databus的整体架构和组件，本节将从databus源码角度分析整个流程和其中的原理细节<br></p>
           <!--noindex-->
           
             <div class="post-button text-center">
@@ -1603,7 +1961,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/07/22/日常疑问随写/" class="post-title-link" itemprop="url">日常疑问</a>
+                <a href="/2019/07/22/日常疑问随写/" class="post-title-link" itemprop="url">日常疑问随写</a>
               
             
           </h1>
@@ -1645,7 +2003,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2020-03-18 17:53:44" itemprop="dateModified" datetime="2020-03-18T17:53:44+08:00">2020-03-18</time>
+                <time title="修改时间：2020-03-18 17:57:50" itemprop="dateModified" datetime="2020-03-18T17:57:50+08:00">2020-03-18</time>
               
             
           </span>
@@ -1698,359 +2056,11 @@
 
       
         
-          
-            <h2 id="springboot中main方法执行完为什么不退出"><a href="#springboot中main方法执行完为什么不退出" class="headerlink" title="springboot中main方法执行完为什么不退出"></a>springboot中main方法执行完为什么不退出</h2><p>首先明白一个概念，守护线程和用户线程，Daemon Thread和User Thread</p>
-<ul>
-<li>定义：守护线程，在没有用户线程可服务时会自动离开。</li>
-<li>优先级：守护线程的优先级较低，用于为系统中的其它对象和线程提供服务。<br>在main方法中，如果有非守护线程，那么main方法执行完之后，JVM不会立即退出，会等到所有的非守护线程执行完之后才退出，下面是一个新建的springboot项目中，启动后，通过jprofiler查看到的线程情况<br><img src="/2019/07/22/日常疑问随写/jprofiler2.PNG" alt="bp"><br>从上图可以看出，main线程结束之后，其他子线程依旧在运行，在看下dump可以看出，main2线程在sleep<br><img src="/2019/07/22/日常疑问随写/jprofiler1.PNG" alt="blockchain" title="jprofiler"><br>通过dump信息，追踪到代码中，可以看出main2的sleep是由于dubbo的TpsLimitFilter类启动了new Thread，并且sleep<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">        (<span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">while</span>(<span class="keyword">true</span>) &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">1000L</span>);</span><br><span class="line">                        <span class="keyword">synchronized</span>(TpsLimitFilter.notifyObject) &#123;</span><br><span class="line">                            TpsLimitFilter.notifyObject.notifyAll();</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException var4) &#123;</span><br><span class="line">                        var4.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;)).start();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2019/07/11/LRU/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="WDB">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="好好学习,天天向上">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/07/11/LRU/" class="post-title-link" itemprop="url">常见LRU算法</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-07-11 14:19:02 / 修改时间：14:36:06" itemprop="dateCreated datePublished" datetime="2019-07-11T14:19:02+08:00">2019-07-11</time>
-            
-
-            
-              
-
-              
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/常用算法/" itemprop="url" rel="index"><span itemprop="name">常用算法</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>LRU算法在数据Redis，Memcache数据淘汰场景中有很广泛的用途，一下罗列出网上比较常见的LRU算法原理及其变种。<br></p>
+          <p>记录日常开发过程中遇到的一些小的疑问，疑惑，侧重于记录小的知识点<br></p>
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2019/07/11/LRU/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2019/07/10/JVM垃圾回收/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="WDB">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="好好学习,天天向上">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/07/10/JVM垃圾回收/" class="post-title-link" itemprop="url">JVM垃圾回收</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-07-10 18:44:46" itemprop="dateCreated datePublished" datetime="2019-07-10T18:44:46+08:00">2019-07-10</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2019-08-14 10:44:04" itemprop="dateModified" datetime="2019-08-14T10:44:04+08:00">2019-08-14</time>
-              
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h1><h2 id="堆（Heap）"><a href="#堆（Heap）" class="headerlink" title="堆（Heap）"></a>堆（Heap）</h2><ul>
-<li>堆是JVM运行时数据区，所有实例和数组的内存均由此分配，在JVM启动时创建。堆也是GC主要的操作区域，一般我们所说的垃圾回收都是在说堆上的垃圾回收。</li>
-<li>存储的全部是对象，每个对象包含一个与之对应的class的信息。(class的目的是得到操作指令) </li>
-<li>jvm只有一个堆区(heap)被所有线程共享，堆中不存放基本类型和对象引用，只存放对象本身</li></ul>
-          <!--noindex-->
-          
-            <div class="post-button text-center">
-              <a class="btn" href="/2019/07/10/JVM垃圾回收/#more" rel="contents">
+              <a class="btn" href="/2019/07/22/日常疑问随写/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -2141,7 +2151,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-count">17</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -2176,7 +2186,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">9</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -2245,7 +2259,19 @@
                     
                       
                     
-                    <span class="site-state-item-count">26</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">30</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>

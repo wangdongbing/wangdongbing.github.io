@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5">
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="DDD并不是一个新的概念，事实上，在十多年前，这一概念就被提出，只是没有得到广泛的应用而已，大家可以看下我们互联网系统的进化历程，应用从单体到微服务，数据从冷备热备到多活，开发方式从瀑布到敏捷，我们的系统变得更灵活，架构变得跟清晰扁平。但是我们只关注了系统层面的架构或者设计，而忽略了业务层面的设计，互联网的特点就是快，业务先跑起来再说，有问题以后再优化，再重构，结果就是业务越堆越多，架构越来越混乱">
+<meta name="keywords" content="DDD,领域驱动设计,系统建模">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DDD入门">
+<meta property="og:url" content="http://www.wangdongbing.com/2020/03/24/DDD入门/index.html">
+<meta property="og:site_name" content="好好学习,天天向上">
+<meta property="og:description" content="DDD并不是一个新的概念，事实上，在十多年前，这一概念就被提出，只是没有得到广泛的应用而已，大家可以看下我们互联网系统的进化历程，应用从单体到微服务，数据从冷备热备到多活，开发方式从瀑布到敏捷，我们的系统变得更灵活，架构变得跟清晰扁平。但是我们只关注了系统层面的架构或者设计，而忽略了业务层面的设计，互联网的特点就是快，业务先跑起来再说，有问题以后再优化，再重构，结果就是业务越堆越多，架构越来越混乱">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-24T16:05:26.765Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DDD入门">
+<meta name="twitter:description" content="DDD并不是一个新的概念，事实上，在十多年前，这一概念就被提出，只是没有得到广泛的应用而已，大家可以看下我们互联网系统的进化历程，应用从单体到微服务，数据从冷备热备到多活，开发方式从瀑布到敏捷，我们的系统变得更灵活，架构变得跟清晰扁平。但是我们只关注了系统层面的架构或者设计，而忽略了业务层面的设计，互联网的特点就是快，业务先跑起来再说，有问题以后再优化，再重构，结果就是业务越堆越多，架构越来越混乱">
+
+
+
+
+
+
+  <link rel="canonical" href="http://www.wangdongbing.com/2020/03/24/DDD入门/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>DDD入门 | 好好学习,天天向上</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">好好学习,天天向上</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2020/03/24/DDD入门/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="WDB">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好学习,天天向上">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">DDD入门
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-03-24 23:49:37" itemprop="dateCreated datePublished" datetime="2020-03-24T23:49:37+08:00">2020-03-24</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-03-25 00:05:26" itemprop="dateModified" datetime="2020-03-25T00:05:26+08:00">2020-03-25</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/DDD/" itemprop="url" rel="index"><span itemprop="name">DDD</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>DDD并不是一个新的概念，事实上，在十多年前，这一概念就被提出，只是没有得到广泛的应用而已，大家可以看下我们互联网系统的进化历程，应用从单体到微服务，数据从冷备热备到多活，开发方式从瀑布到敏捷，我们的系统变得更灵活，架构变得跟清晰扁平。但是我们只关注了系统层面的架构或者设计，而忽略了业务层面的设计，互联网的特点就是快，业务先跑起来再说，有问题以后再优化，再重构，结果就是业务越堆越多，架构越来越混乱，到最后谁都不敢再去重构这么一个臃肿的系统，这是我们在前期缺乏对业务的整体建模和思考的后果，尤其是对于复杂业务，这个时候大家开始寻求一种解决问题的方式，自然而然的将目光转向了DDD-领域驱动设计。<br><a id="more"></a></p>
+<h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><h3 id="什么是DDD"><a href="#什么是DDD" class="headerlink" title="什么是DDD"></a>什么是DDD</h3><p>DDD是领域驱动设计，所谓领域驱动设计，是指我们在软件设计的时候，重点关注业务逻辑，熟悉业务逻辑，从而抽象出来领域模型，基于领域模型展开系统设计</p>
+<h3 id="DDD能解决什么问题"><a href="#DDD能解决什么问题" class="headerlink" title="DDD能解决什么问题"></a>DDD能解决什么问题</h3><p>解决复杂业务系统的大泥球问题，让业务系统变的更健壮，更利于扩展&amp;维护</p>
+<h3 id="谁适合DDD"><a href="#谁适合DDD" class="headerlink" title="谁适合DDD"></a>谁适合DDD</h3><p>复杂的业务系统</p>
+<h2 id="战略建模工具"><a href="#战略建模工具" class="headerlink" title="战略建模工具"></a>战略建模工具</h2><p>之所以会采用DDD，是因为业务模型的高度复杂，我们应专注于业务复杂性而非技术复杂性</p>
+<h3 id="限界上下文"><a href="#限界上下文" class="headerlink" title="限界上下文"></a>限界上下文</h3><p>限界上下文是语义和语境上的边界，一个团队可以在多个限界上下文中工作，但是多个团队不能在一个限界上下文中共事</p>
+<h3 id="通用语言"><a href="#通用语言" class="headerlink" title="通用语言"></a>通用语言</h3><p>通用语言是在限界上下文中表达其边界的工具，这一语言由在该限界上下文中开发的每个成员使用，软件模型的源代码就是这种语言的书面表达方式</p>
+<h3 id="子域"><a href="#子域" class="headerlink" title="子域"></a>子域</h3><p>子域代表的是一个单一的，有逻辑的领域模型，限界上下文应该与子域一一对应，主要有一下几种子域类型</p>
+<h4 id="核心域"><a href="#核心域" class="headerlink" title="核心域"></a>核心域</h4><p>它是一个唯一的，定义明确的领域模型，要对他进行战略投资，并在一个明确的限界上下文中投入大量资源去精心打磨通用语言</p>
+<h4 id="支撑子域"><a href="#支撑子域" class="headerlink" title="支撑子域"></a>支撑子域</h4><p>支撑子域的场景是找不到现成的解决方案，但是重要程度远远不如核心域，可以通过定制开发或者外包的方式实现此类限界上下文</p>
+<h3 id="通用子域"><a href="#通用子域" class="headerlink" title="通用子域"></a>通用子域</h3><p>通用子域的解决方案可以是采购现成的，外包的，或者团队内部实现的</p>
+<h3 id="上下文映射"><a href="#上下文映射" class="headerlink" title="上下文映射"></a>上下文映射</h3><p>上下文映射（context mapping）是指不通限界上下文之间的映射关系，包括两个限界上下文之间的集成关系以及团队之间的动态关系，由于不通的限界上下文存在不通的通用语言，上下文映射也代表不通语言之间的转译过程</p>
+<p><code>映射的种类</code></p>
+<ol>
+<li>合作关系</li>
+<li>共享内核</li>
+<li>客户-供应商</li>
+<li>跟随者</li>
+<li>防腐层<br>下游团队在其通用语言和它的上游通用语言之间建立的一个翻译层，隔离了下游模型和上游模型，并完成两者之前的翻译。比如API网关</li>
+<li>开放主机服务<br>开放式主机服务会定义一套协议或者接口，让限界上下文可以被当做一组服务访问 REST</li>
+<li>已发布语言<br>已发布语言是一种有着丰富文档的信息交换语言，同事提供 和使用已发布语言的开放主机服务可以为第三方提供最佳的集成体验，比如RPC</li>
+<li>各行其道<br>没有关系，不需要控制和承诺</li>
+<li>大泥球</li>
+</ol>
+<p><code>集成方式有</code></p>
+<ol>
+<li>RPC</li>
+<li>RESTFul  Http</li>
+<li>消息机制<br>基于领域事件的发布订阅来完成，可以很好地用来解耦，但要注意增强事件和反向查询之前的权衡<br>基于数据库的集成方式是一定要避免的，可以说是一种返末世，首先，它是单点故障和性能瓶颈的源头，违背了“高内聚，低耦合”的设计原则，对数据库的任何调整将会引起霰弹是修改，消费方上下文受到数据库内部细节和技术选型的干扰</li>
+</ol>
+<h3 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h3><ol>
+<li>端口射适配器架构，即六边形架构</li>
+<li>事件驱动架构</li>
+<li>CQRS</li>
+<li>响应式架构和Actor模型</li>
+<li>具象状态传输REST</li>
+<li>SOA和微服务<br>SOA将应运程序的不通功能单元（服务）通过服务之间定义好的接口和契约联系起来，SOA和微服务一脉相承，微服务可以认为是SOA的一种特定的现代实现，微服务相对于SOA更注重对独立业务单元的拆分来形成清晰的边界，并采用轻量级的通信机制,<strong><em>微服务的划分可以从以下几点展开思考</em></strong><ul>
+<li>首先是现有架构间的依赖关系</li>
+<li>其实是业务的可扩展性</li>
+<li>再次是团队目前的人员能力</li>
+<li>最后则是实现过程中可能遇到的风险与挑战<br>这些划分的依据往往也是我们在DDD中对上线文和子域进行划分时需要考虑的问题</li>
+</ul>
+</li>
+<li>云原生</li>
+</ol>
+<h2 id="战术建模工具"><a href="#战术建模工具" class="headerlink" title="战术建模工具"></a>战术建模工具</h2><h3 id="实体"><a href="#实体" class="headerlink" title="实体"></a>实体</h3><p>一个实体模型就是一个独立的事物，每个实体都拥有一个唯一的标识符，将实体与其他建模工具区分开的主要因素是他的唯一性-即他的个体性</p>
+<h3 id="值对象"><a href="#值对象" class="headerlink" title="值对象"></a>值对象</h3><p>一个值对象，是对一个不变的概念整体所建立的模型，和实体不一样，它没有唯一标识符，而是由值类型封装的属性对比来决定相等性，此外，一个值对象不是事物，而是常常用来描述，量化或者测量一个实体</p>
+<h3 id="聚合"><a href="#聚合" class="headerlink" title="聚合"></a>聚合</h3><p>聚合由一个或者多个实体或者多个值对象组成，其中一个实体被称为聚合根，每个聚合都会形成保证事务一致性的边界，其控制的业务规则必须保证原子性，一致性<br><code>贫血模型</code><br>贫血模型是指使用的领域模型只包含共有访问器（Getter&amp;Setter），没有包含任何真正的业务逻辑行为的模型</p>
+<ul>
+<li>在我们经常使用的ORM框架中，会将RDS的查询和结果直接映射为对象（大部分情况下会被称为“实体”），这些对象只包含Getter&amp;Setter，而真正的业务逻辑被放在称为服务的对象里，本来应该和这些实体有着内聚的业务逻辑完全被置于独立的服务中，最终导致服务越来越臃肿的同时，把这些ORM映射的对象变成了贫血模型</li>
+<li>领域模型应该有持久化的对象转换而来，并承担被错放在服务中的那些业务逻辑</li>
+</ul>
+<h3 id="领域事件"><a href="#领域事件" class="headerlink" title="领域事件"></a>领域事件</h3><p>在领域事件的运用中，我们可能会用到事件溯源（Event Sourcing），即经常对领域对象基于持久化的领域事件重建，为了性能考虑，快照是事件溯源必须要支持的一种机制，减少事件溯源的长度和深度</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/DDD/" rel="tag"># DDD</a>
+          
+            <a href="/tags/领域驱动设计/" rel="tag"># 领域驱动设计</a>
+          
+            <a href="/tags/系统建模/" rel="tag"># 系统建模</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/03/19/tomcat源码分析/" rel="next" title="tomcat源码分析">
+                <i class="fa fa-chevron-left"></i> tomcat源码分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">WDB</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">17</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">30</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概念"><span class="nav-number">1.</span> <span class="nav-text">概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是DDD"><span class="nav-number">1.1.</span> <span class="nav-text">什么是DDD</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DDD能解决什么问题"><span class="nav-number">1.2.</span> <span class="nav-text">DDD能解决什么问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#谁适合DDD"><span class="nav-number">1.3.</span> <span class="nav-text">谁适合DDD</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#战略建模工具"><span class="nav-number">2.</span> <span class="nav-text">战略建模工具</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#限界上下文"><span class="nav-number">2.1.</span> <span class="nav-text">限界上下文</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通用语言"><span class="nav-number">2.2.</span> <span class="nav-text">通用语言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#子域"><span class="nav-number">2.3.</span> <span class="nav-text">子域</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#核心域"><span class="nav-number">2.3.1.</span> <span class="nav-text">核心域</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#支撑子域"><span class="nav-number">2.3.2.</span> <span class="nav-text">支撑子域</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通用子域"><span class="nav-number">2.4.</span> <span class="nav-text">通用子域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#上下文映射"><span class="nav-number">2.5.</span> <span class="nav-text">上下文映射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#架构"><span class="nav-number">2.6.</span> <span class="nav-text">架构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#战术建模工具"><span class="nav-number">3.</span> <span class="nav-text">战术建模工具</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#实体"><span class="nav-number">3.1.</span> <span class="nav-text">实体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#值对象"><span class="nav-number">3.2.</span> <span class="nav-text">值对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#聚合"><span class="nav-number">3.3.</span> <span class="nav-text">聚合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#领域事件"><span class="nav-number">3.4.</span> <span class="nav-text">领域事件</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">WDB</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/schemes/muse.js?v=7.0.1"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5">
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="分布式锁的实现方式有很多中，比较常用的有redis，zookeeper，数据库等，本文将介绍下常用的实现方案以及优缺点，首先分布式锁也和其他锁一样，有共享锁，有排他锁，共享锁的比较简单，本文将主要讨论排他锁的获取锁和释放锁过程">
+<meta name="keywords" content="中间件,分布式锁">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式锁实现方式">
+<meta property="og:url" content="http://www.wangdongbing.com/2020/03/18/分布式锁/index.html">
+<meta property="og:site_name" content="好好学习,天天向上">
+<meta property="og:description" content="分布式锁的实现方式有很多中，比较常用的有redis，zookeeper，数据库等，本文将介绍下常用的实现方案以及优缺点，首先分布式锁也和其他锁一样，有共享锁，有排他锁，共享锁的比较简单，本文将主要讨论排他锁的获取锁和释放锁过程">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-03-19T14:55:30.300Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="分布式锁实现方式">
+<meta name="twitter:description" content="分布式锁的实现方式有很多中，比较常用的有redis，zookeeper，数据库等，本文将介绍下常用的实现方案以及优缺点，首先分布式锁也和其他锁一样，有共享锁，有排他锁，共享锁的比较简单，本文将主要讨论排他锁的获取锁和释放锁过程">
+
+
+
+
+
+
+  <link rel="canonical" href="http://www.wangdongbing.com/2020/03/18/分布式锁/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>分布式锁实现方式 | 好好学习,天天向上</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">好好学习,天天向上</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2020/03/18/分布式锁/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="WDB">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好学习,天天向上">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">分布式锁实现方式
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-03-18 22:41:27" itemprop="dateCreated datePublished" datetime="2020-03-18T22:41:27+08:00">2020-03-18</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-03-19 22:55:30" itemprop="dateModified" datetime="2020-03-19T22:55:30+08:00">2020-03-19</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/分布式系统/" itemprop="url" rel="index"><span itemprop="name">分布式系统</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>分布式锁的实现方式有很多中，比较常用的有redis，zookeeper，数据库等，本文将介绍下常用的实现方案以及优缺点，首先分布式锁也和其他锁一样，有共享锁，有排他锁，共享锁的比较简单，本文将主要讨论排他锁的获取锁和释放锁过程<br><a id="more"></a></p>
+<h2 id="redis"><a href="#redis" class="headerlink" title="redis"></a>redis</h2><p>redis实现分布式锁也有很多方法，我们可以自己实现，也可以直接使用现有的基于redis的组件,比如redission</p>
+<h3 id="redis命令实现"><a href="#redis命令实现" class="headerlink" title="redis命令实现"></a>redis命令实现</h3><p>目前主流的使用reids实现分布式锁的方案中，以下是比较适合大部分业务场景的，即使用如下命令实现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">加锁 </span><br><span class="line">SET key 随机值 NX EX|PX</span><br></pre></td></tr></table></figure>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">释放锁 </span><br><span class="line"><span class="keyword">if</span> redis.call(<span class="string">"get"</span>,KEYS[<span class="number">1</span>]) == ARGV[<span class="number">1</span>] <span class="keyword">then</span></span><br><span class="line">    <span class="keyword">return</span> redis.call(<span class="string">"del"</span>,KEYS[<span class="number">1</span>])</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<p>以上分别为获取锁和释放锁的命令，针对以上命令，我们可能会有如下疑问</p>
+<ol>
+<li>为什么使用nx命令<br>nx的语意是只有在key不存在的情况下，才会设置成功，这个语意再加上上述set命令是原子操作，这样就确保了在同一时刻，只有一个请求能够设置成功key值，也就是只有一个请求能拿到锁</li>
+<li>为什么使用EX或者PX<br>EX或者PX的语意都是给key设置一个过期时间，我们知道，即然有了获取锁的过程，那么必然会有释放锁的过程，对于上述方案而言，释放锁其实就是删除key，那么加入程序在删除key的时候出问题了，即使是finally也没有执行到，那么就会造成锁释放不了的问题<br>所以，我们要给key加一个过期时间，避免锁无法释放的问题</li>
+<li>key的值为什么要随机<br>加入A和B同时要获取锁，结果A获得，B没获得，那么在A获得之后，会给key一个过期时间，比如是1s，但是A业务逻辑执行了2s，才开始释放锁，那么在多于执行的这一秒之类，加入B在尝试获取锁，是可以获取成功的，接下来A再去释放锁，也就是删除key，这就意味着可能会释放其他用户锁获取的锁。<br>所以，我们在获取锁的时候，要给key指定一个随机值，这样在释放的时候将预先设施的随机值和redis里面的value比较，如果相同，那么就说明我们释放的是同一个用户获取的锁</li>
+<li>释放锁为什么要用lua脚本<br>上述第三点也解释到了，我们释放锁的过程要分为两部，获取key的值，然后和预先设置的随机值比较，那么这就不是原子操作了，将会带来新的问题，比如get完之后刚好key的过期时间到了，也就意味着if判断通过了，开始执行删除key操作了，那么这中间B可能获取到锁了，这样，A又会把B的锁释放了。<br>综上，我们需要释放锁为原子操作，所以选择lua脚本<br>以上命令中，ARGV[1]表示设置key时指定的随机值。KEYS[1]表示需要加锁的资源，针对以上命令，我们可能会有如下疑问</li>
+</ol>
+<h3 id="redisson"><a href="#redisson" class="headerlink" title="redisson"></a>redisson</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">加锁代码</span><br><span class="line"><span class="function">Future <span class="title">tryLockInnerAsync</span><span class="params">(<span class="keyword">long</span> leaseTime, TimeUnit unit, <span class="keyword">long</span> threadId)</span> </span>&#123;</span><br><span class="line">        internalLockLeaseTime = unit.toMillis(leaseTime);</span><br><span class="line">        <span class="keyword">return</span> commandExecutor.evalWriteAsync(getName(), LongCodec.INSTANCE, RedisCommands.EVAL_LONG,</span><br><span class="line">            <span class="comment">// 检查是否key已经被占用，如果没有则设置超时时间和唯一标识，初始化value=1</span></span><br><span class="line">            <span class="string">"if (redis.call('exists', KEYS[1]) == 0) then "</span> +</span><br><span class="line">                <span class="string">"redis.call('hset', KEYS[1], ARGV[2], 1); "</span> +</span><br><span class="line">                <span class="string">"redis.call('pexpire', KEYS[1], ARGV[1]); "</span> +</span><br><span class="line">                <span class="string">"return nil; "</span> +</span><br><span class="line">            <span class="string">"end; "</span> +</span><br><span class="line">            <span class="comment">// 如果锁重入,需要判断锁的key，参数都一样的情况下，value+1</span></span><br><span class="line">            <span class="string">"if (redis.call('hexists', KEYS[1], ARGV[2]) == 1) then "</span> +</span><br><span class="line">                <span class="string">"redis.call('hincrby', KEYS[1], ARGV[2], 1); "</span> +</span><br><span class="line">                <span class="comment">//锁重入重新设置超时时间</span></span><br><span class="line">                <span class="string">"redis.call('pexpire', KEYS[1], ARGV[1]); "</span> +</span><br><span class="line">                <span class="string">"return nil; "</span> +</span><br><span class="line">            <span class="string">"end; "</span> +</span><br><span class="line">            <span class="comment">// 返回剩余的过期时间</span></span><br><span class="line">            <span class="string">"return redis.call('pttl', KEYS[1]);"</span>,</span><br><span class="line">            Collections.singletonList(getName()), internalLockLeaseTime, getLockName(threadId));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上代码为redisson的获取锁逻辑，为了原子性，也是lua实现，相比于我们set nx的方式，redisson有以下特点</p>
+<ol>
+<li>使用watch dog实现自动延期，比如A获取到锁，并且设置过期时间20s，但是业务执行了30s，那么watch dog线程就会检查到A还持有锁，然后就会延长key的存活时间</li>
+<li>可重入锁，在上述代码第二个判断加锁参数一致的情况下，value+1，实现可重入</li>
+<li>释放锁的过程中，每次对value-1，如果为0，则说明锁释放，执行del命令</li>
+</ol>
+<p>总结：在生产环境中，建议使用redisson，redisson的设计更加全面，而且提供了丰富的锁类型，比如公平锁，非公平锁，读写锁，闭锁，信号量等<br>不管是自己实现还是使用redisson，都会面临一个问题，那就是master-slave发生主备切换的时候，可能会发生A和B都获取到锁的情况，比如A在master上获取到锁了，这个时候master挂了，slave变为master，B再去获取锁的时候，是可以在新的master上获取到的</p>
+<h2 id="zookeeper"><a href="#zookeeper" class="headerlink" title="zookeeper"></a>zookeeper</h2><p>和redis实现分布式锁一样，zookeeper我们也可以自己使用zookeeper实现分布式锁，也可以直接使用现有的一些开源组件，比如cuartor，cuartor是zk的客户端实现，curator之于zk就像guava之于java。<br>由于自己代码实现比较复杂，且cuartor已经做了很好的封装，提供了完善可靠的锁机制，接下来我们将简单分析下cuartor基于ZooKeeper实现分布式锁的原理</p>
+<ol>
+<li>创建一个目录mylock； </li>
+<li>A想获取锁就在mylock目录下创建一个临时顺序节点 </li>
+<li>获取mylock目录下所有的子节点，然后获取比自己小的兄弟节点，如果不存在，则说明当前线程顺序号最小，获得锁； </li>
+<li>这时候B想获取锁，他会做同样的事情，在mylock目录下建一个零时顺序节点，并判断自己不是最小节点，如果是，获得锁，如果不是，获取锁失败，然后设置监听比自己次小的节点</li>
+<li>A处理完，删除自己的节点，释放锁，B监听到变更事件，判断自己是不是最小的节点，如果是则获得锁。</li>
+</ol>
+<p>针对以上加锁流程，我们可能会产如下疑问</p>
+<ol>
+<li>为什么是临时节点<br>临时节点是为了在客户端出现宕机，且没有主动释放锁的时候，zk能够感知到客户端的异常，并且删除对应的节点，也就是释放锁</li>
+<li>为什么是顺序节点<br>节点的顺序是为了锁的阻塞特性，公平特性</li>
+</ol>
+<p>优点：具备高可用、可重入、阻塞锁特性，可解决失效死锁问题。<br>缺点：因为需要频繁的创建和删除节点，性能上不如Redis方式。</p>
+<h2 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h2><p>基于数据库的实现方式比较简单粗暴，主要使用数据库的唯一索引来实现，即A和B同时插入同一条数据，由于唯一索引的限制，只能有一条插入成功，插入成功即拿到锁</p>
+<ol>
+<li>锁开销比较大，需要操作数据库</li>
+<li>阻塞策略需要自己实现，在B插入失败之后，如需阻塞，需要实现重试等逻辑</li>
+<li>强依赖数据库，数据库的可用性和性能将直接影响分布式锁的可用性及性能</li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/中间件/" rel="tag"># 中间件</a>
+          
+            <a href="/tags/分布式锁/" rel="tag"># 分布式锁</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/03/17/databus源码分析/" rel="next" title="databus源码分析">
+                <i class="fa fa-chevron-left"></i> databus源码分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/03/19/tomcat源码分析/" rel="prev" title="tomcat源码分析">
+                tomcat源码分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">WDB</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">17</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">30</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#redis"><span class="nav-number">1.</span> <span class="nav-text">redis</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#redis命令实现"><span class="nav-number">1.1.</span> <span class="nav-text">redis命令实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redisson"><span class="nav-number">1.2.</span> <span class="nav-text">redisson</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#zookeeper"><span class="nav-number">2.</span> <span class="nav-text">zookeeper</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据库"><span class="nav-number">3.</span> <span class="nav-text">数据库</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">WDB</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/schemes/muse.js?v=7.0.1"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
