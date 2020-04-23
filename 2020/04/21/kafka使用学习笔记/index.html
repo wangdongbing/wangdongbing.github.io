@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5">
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="kafka是由Linkedin开源的一个分布式流式系统，它的最大的特性就是可以实时的处理大量数据以满足各种需求场景：比如基于hadoop的批处理系统、低延迟的实时系统、storm/Spark流式处理引擎，web/nginx日志、访问日志，消息服务等等，通常我们使用过程中以消息系统来使用，kafka有很多优势，比如高可用，高吞吐等，在这里简单记录一下对一些特性的理解和学习">
+<meta name="keywords" content="中间件,kafka,消息MQ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka使用学习笔记">
+<meta property="og:url" content="http://www.wangdongbing.com/2020/04/21/kafka使用学习笔记/index.html">
+<meta property="og:site_name" content="好好学习,天天向上">
+<meta property="og:description" content="kafka是由Linkedin开源的一个分布式流式系统，它的最大的特性就是可以实时的处理大量数据以满足各种需求场景：比如基于hadoop的批处理系统、低延迟的实时系统、storm/Spark流式处理引擎，web/nginx日志、访问日志，消息服务等等，通常我们使用过程中以消息系统来使用，kafka有很多优势，比如高可用，高吞吐等，在这里简单记录一下对一些特性的理解和学习">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-04-23T09:24:17.911Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kafka使用学习笔记">
+<meta name="twitter:description" content="kafka是由Linkedin开源的一个分布式流式系统，它的最大的特性就是可以实时的处理大量数据以满足各种需求场景：比如基于hadoop的批处理系统、低延迟的实时系统、storm/Spark流式处理引擎，web/nginx日志、访问日志，消息服务等等，通常我们使用过程中以消息系统来使用，kafka有很多优势，比如高可用，高吞吐等，在这里简单记录一下对一些特性的理解和学习">
+
+
+
+
+
+
+  <link rel="canonical" href="http://www.wangdongbing.com/2020/04/21/kafka使用学习笔记/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Kafka使用学习笔记 | 好好学习,天天向上</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">好好学习,天天向上</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2020/04/21/kafka使用学习笔记/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="WDB">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好学习,天天向上">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Kafka使用学习笔记
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-04-21 09:39:18" itemprop="dateCreated datePublished" datetime="2020-04-21T09:39:18+08:00">2020-04-21</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-04-23 17:24:17" itemprop="dateModified" datetime="2020-04-23T17:24:17+08:00">2020-04-23</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/中间件/" itemprop="url" rel="index"><span itemprop="name">中间件</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>kafka是由Linkedin开源的一个分布式流式系统，它的最大的特性就是可以实时的处理大量数据以满足各种需求场景：比如基于hadoop的批处理系统、低延迟的实时系统、storm/Spark流式处理引擎，web/nginx日志、访问日志，消息服务等等，通常我们使用过程中以消息系统来使用，kafka有很多优势，比如高可用，高吞吐等，在这里简单记录一下对一些特性的理解和学习<br><a id="more"></a></p>
+<h2 id="高吞吐、低延迟"><a href="#高吞吐、低延迟" class="headerlink" title="高吞吐、低延迟"></a>高吞吐、低延迟</h2><h3 id="磁盘顺序写入"><a href="#磁盘顺序写入" class="headerlink" title="磁盘顺序写入"></a>磁盘顺序写入</h3><p>kafka的消息是不断追加到文件中的，这个特性使kafka可以充分利用磁盘的顺序读写性能，顺序读写不需要硬盘磁头的寻道时间，只需很少的扇区旋转时间，所以速度远快于随机读写<br>具体是kafka使用基于日志结构(log-structured)的数据格式，即每个分区日志只能在尾部追加写入(append)，不允许随机跳到某个位置开始写入。</p>
+<h3 id="zero-copy"><a href="#zero-copy" class="headerlink" title="zero-copy"></a>zero-copy</h3><p>kafka中使用zero-copy的方式是使用DMA机制，即直接内存访问技术，对于DMA和MMAP的区别我们再次暂不讨论<br>传统模式下数据流：</p>
+<ol>
+<li>读取内容，将内容加载到内核的状态下的Buffer中</li>
+<li>CPU控制将内核模式数据复制到用户模式下</li>
+<li>将用户模式的数据，复制到内核模式的Socket Buffer中</li>
+<li>将内核模式下的Socket Buffer的数据复制到网卡设备中传输</li>
+</ol>
+<p>DMA实现zero-copy:</p>
+<ol>
+<li>将文件内容从磁盘通过DMA引擎复制到内核缓冲区</li>
+<li>将数据位置和长度信息的描述符复制到socket缓存区</li>
+<li>然后直接将数据传输到网络接口，最后发送</li>
+</ol>
+<p>总结：kafka是调用linux系统给出的sendfile系统调用来使用零拷贝。Java中对应FileChannel.transferTo接口。</p>
+<h3 id="Page-Cache"><a href="#Page-Cache" class="headerlink" title="Page Cache"></a>Page Cache</h3><p>Broker收到数据后，写磁盘时只是将数据写入Page Cache，并不保证数据一定完全写入磁盘。对于机器宕机时，Page Cache内的数据未写入磁盘从而造成数据丢失，Kafka通过Replication机制去解决。如果为了保证这种情况下数据不丢失而强制将Page Cache中的数据Flush到磁盘，反而会降低性能。也正因如此，Kafka虽然提供了flush.messages和flush.ms两个参数将Page Cache中的数据强制Flush到磁盘，但是Kafka并不建议使用。如果数据消费速度与生产速度相当，甚至不需要通过物理磁盘交换数据，而是直接通过Page Cache交换数据。同时，Follower从Leader Fetch数据时，也可通过Page Cache完成。</p>
+<h3 id="分区"><a href="#分区" class="headerlink" title="分区"></a>分区</h3><p>在集群中broker可以水平扩展，一个topic对应多个parition，一个partion对应多个segment，每次操作针对一小段，同时也可以水平扩展，分布式和并行的方式提供了高吞吐能力</p>
+<h3 id="批量发送"><a href="#批量发送" class="headerlink" title="批量发送"></a>批量发送</h3><p>kafka允许进行批量发送消息，producter发送消息的时候，可以将消息缓存在本地,等到了固定条件发送到kafka，等消息条数到固定条数，一段时间发送一次</p>
+<h3 id="数据压缩"><a href="#数据压缩" class="headerlink" title="数据压缩"></a>数据压缩</h3><p>Kafka还支持对消息集合进行压缩，Producer可以通过GZIP或Snappy格式对消息集合进行压缩，减少传输的数据量，减轻对网IO的压力，批量发送和数据压缩一起使用,单条做数据压缩的话，效果不明显</p>
+<h2 id="高可用"><a href="#高可用" class="headerlink" title="高可用"></a>高可用</h2><p>kafka的高可用主要有多副本机制保证，多副本机制是指一个parition拥有多个副本（replication），多个副本会分配到不同的broker上，kafka会为同一个topic的多个partition选出一个leader，之后所有该partition的请求，实际操作的都是leader，<br>然后再同步到其他的follower。当一个broker宕机之后，所有leader在该broker上的partition都会重新选举，选出一个leader，并将该broker节点踢出ISR(in-sync Replica)队列<br>多副本同步策略中，producer可以指定request.required.acks来决定数据一致性和低延时的取舍，acks有三个值0,1,2,</p>
+<ul>
+<li>0代表只发送，不关注broker是否处理成功</li>
+<li>1代表等待leader节点返回成功，其他replica节点通过fetcher同步，在这里发生leader切换的时候，可能会丢数据</li>
+<li>-1代表所有的 ISR机器同步成功才返回，采用强一致性，可用性最高，但会带来延迟问题</li>
+</ul>
+<h2 id="语义"><a href="#语义" class="headerlink" title="语义"></a>语义</h2><p>Kafka实现了三种语义，下面我们将从生产者和消费者的角度分别分析对各个语义的支持以及实现</p>
+<h3 id="At-most-once"><a href="#At-most-once" class="headerlink" title="At most once"></a>At most once</h3><h4 id="Producer"><a href="#Producer" class="headerlink" title="Producer"></a>Producer</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">acks=0  retries=0</span><br><span class="line">acks可选项：[0，1，all]。</span><br></pre></td></tr></table></figure>
+<p>0表示Producer发送完消息后不会等待任何Broker的确认<br>1表示Producer会等待Broker集群中的leader的确认写入消息<br>all表示Producer需要等待Broker集群中leader和其所有follower的确认写入消息</p>
+<h4 id="Consumer"><a href="#Consumer" class="headerlink" title="Consumer"></a>Consumer</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">enable.auto.commit=true</span><br><span class="line">auto.commit.interval.ms 配置为一个很小的数值,定时提交任务</span><br></pre></td></tr></table></figure>
+<h3 id="At-least-once"><a href="#At-least-once" class="headerlink" title="At least once"></a>At least once</h3><h4 id="Producer-1"><a href="#Producer-1" class="headerlink" title="Producer"></a>Producer</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">默认语义，具体配置为  Kafka中默认acks=1并且retries=2147483647。</span><br></pre></td></tr></table></figure>
+<h4 id="Consumer-1"><a href="#Consumer-1" class="headerlink" title="Consumer"></a>Consumer</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">enable.auto.commit=false,手动调用consumer.commitSync()来提交offset</span><br></pre></td></tr></table></figure>
+<h3 id="Exactly-once"><a href="#Exactly-once" class="headerlink" title="Exactly once"></a>Exactly once</h3><h4 id="Producer-2"><a href="#Producer-2" class="headerlink" title="Producer"></a>Producer</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">- enable.idempotence=true。enable.idempotence </span><br><span class="line">- acks=all</span><br></pre></td></tr></table></figure>
+<p>该配置项表示是否使用幂等性。当enable.idempotence配置为true时，acks必须配置为all。并且建议max.in.flight.requests.per.connection的值小于5。<br>acks=all 表示等leader和follower节点都写入消息才返回确认</p>
+<p>首先kafka本身支持At least once消息送达语义，要在生产端支持有且仅有一次的语义，就需要发送消息的时候实现幂等，要实现消息发送的幂等关键是要实现Broker端消息的去重。具体是用PID和Sequence Numbler来实现</p>
+<p>PID是指：每个新的Producer在初始化的时候会被分配一个唯一的PID，这个PID对用户是不可见的。<br>Sequence Numbler：对于每个PID，该Producer发送数据的每个&lt;Topic, Partition&gt;都对应一个从0开始单调递增的Sequence Number，Broker端在缓存中保存了这Sequence Numbler，对于接收的每条消息，如果其序号比Broker缓存中序号大于1则接受它（req seq num = seq num + 1），否则将其丢弃。这样就可以实现了消息重复提交了。</p>
+<h4 id="Consumer-2"><a href="#Consumer-2" class="headerlink" title="Consumer"></a>Consumer</h4><p>事务，kafka consumer对于Exactly once语义的实现可以通过事务来做，即消费消息和提交消费者offset放在一个事务中，保证原子性，但是前提是配置事务隔离级别为<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">isolation.level=read_committed</span><br></pre></td></tr></table></figure></p>
+<p>read_committed：可以同时读取事务执行过程中的部分写入数据和已经完整提交的事务写入数据；<br>read_uncommitted：完全不等待事务提交，按照offsets order去读取消息，也就是兼容0.11.x版本前Kafka的语义（kafka事务特性在0.11版本之后引入）；</p>
+<h2 id="一些常用命令"><a href="#一些常用命令" class="headerlink" title="一些常用命令"></a>一些常用命令</h2><p>启动服务<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">. /kafka -server -start.sh.. / config / server.properties 1 &gt; /dev/null 2&gt;&amp;1 &amp;</span><br></pre></td></tr></table></figure></p>
+<p>创建topic<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./kafka -topics.sh --create --zookeeper localhost: 2181 --config max.message.bytes = 12800000 --config flush.messages =1  --replication 1 -factor 1 --partitions 1 --topic test</span><br></pre></td></tr></table></figure></p>
+<p>查看topic详情<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./kafka -topics.sh --describe--zookeeper 168.61.13.109:2181 --topic test</span><br></pre></td></tr></table></figure></p>
+<p>写入消息<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./kafka -console -producer.sh --broker -list localhost: 9092 --topic test</span><br></pre></td></tr></table></figure></p>
+<p>消费消息<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./kafka - console -consumer.sh --bootstrap -server localhost: 9092 --topic test --from -beginning</span><br></pre></td></tr></table></figure></p>
+<p>变更topic信息<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./kafka -topics.sh --zookeeper 192.168.187.146:2181 --alter --topic test0 --partitions 3</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/中间件/" rel="tag"># 中间件</a>
+          
+            <a href="/tags/kafka/" rel="tag"># kafka</a>
+          
+            <a href="/tags/消息MQ/" rel="tag"># 消息MQ</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/03/27/DDD的一些思考/" rel="next" title="DDD的一些思考和感悟">
+                <i class="fa fa-chevron-left"></i> DDD的一些思考和感悟
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">WDB</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">19</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">32</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#高吞吐、低延迟"><span class="nav-number">1.</span> <span class="nav-text">高吞吐、低延迟</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#磁盘顺序写入"><span class="nav-number">1.1.</span> <span class="nav-text">磁盘顺序写入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#zero-copy"><span class="nav-number">1.2.</span> <span class="nav-text">zero-copy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Page-Cache"><span class="nav-number">1.3.</span> <span class="nav-text">Page Cache</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分区"><span class="nav-number">1.4.</span> <span class="nav-text">分区</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#批量发送"><span class="nav-number">1.5.</span> <span class="nav-text">批量发送</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据压缩"><span class="nav-number">1.6.</span> <span class="nav-text">数据压缩</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#高可用"><span class="nav-number">2.</span> <span class="nav-text">高可用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#语义"><span class="nav-number">3.</span> <span class="nav-text">语义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#At-most-once"><span class="nav-number">3.1.</span> <span class="nav-text">At most once</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Producer"><span class="nav-number">3.1.1.</span> <span class="nav-text">Producer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Consumer"><span class="nav-number">3.1.2.</span> <span class="nav-text">Consumer</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#At-least-once"><span class="nav-number">3.2.</span> <span class="nav-text">At least once</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Producer-1"><span class="nav-number">3.2.1.</span> <span class="nav-text">Producer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Consumer-1"><span class="nav-number">3.2.2.</span> <span class="nav-text">Consumer</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Exactly-once"><span class="nav-number">3.3.</span> <span class="nav-text">Exactly once</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Producer-2"><span class="nav-number">3.3.1.</span> <span class="nav-text">Producer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Consumer-2"><span class="nav-number">3.3.2.</span> <span class="nav-text">Consumer</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一些常用命令"><span class="nav-number">4.</span> <span class="nav-text">一些常用命令</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">WDB</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/schemes/muse.js?v=7.0.1"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
