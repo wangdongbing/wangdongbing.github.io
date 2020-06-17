@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5">
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="elasticsearch是一个基于Lucene的分布式搜索引擎，能够支持准实时的数据检索NRT(near real-time),支持海量数据的处理，包括结构化和非结构化数据，提供强大的全文搜索能力，但是ES不仅仅是一个全文搜索引擎，他能够解决传统数据库解决不了的复杂查询，计算，聚合等操作，还有时序数据的处理，比如日志处理、监控数据的存储、分析和可视化等">
+<meta name="keywords" content="中间件,elasticsearch,搜索">
+<meta property="og:type" content="article">
+<meta property="og:title" content="elasticsearch架构原理">
+<meta property="og:url" content="http://www.wangdongbing.com/2020/06/01/elasticSearch学习笔记/ES架构原理/index.html">
+<meta property="og:site_name" content="好好学习,天天向上">
+<meta property="og:description" content="elasticsearch是一个基于Lucene的分布式搜索引擎，能够支持准实时的数据检索NRT(near real-time),支持海量数据的处理，包括结构化和非结构化数据，提供强大的全文搜索能力，但是ES不仅仅是一个全文搜索引擎，他能够解决传统数据库解决不了的复杂查询，计算，聚合等操作，还有时序数据的处理，比如日志处理、监控数据的存储、分析和可视化等">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/06/01/elasticSearch学习笔记/ES架构原理/es系统架构.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/06/01/elasticSearch学习笔记/ES架构原理/es分片结构.png">
+<meta property="og:updated_time" content="2020-06-17T10:10:16.333Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="elasticsearch架构原理">
+<meta name="twitter:description" content="elasticsearch是一个基于Lucene的分布式搜索引擎，能够支持准实时的数据检索NRT(near real-time),支持海量数据的处理，包括结构化和非结构化数据，提供强大的全文搜索能力，但是ES不仅仅是一个全文搜索引擎，他能够解决传统数据库解决不了的复杂查询，计算，聚合等操作，还有时序数据的处理，比如日志处理、监控数据的存储、分析和可视化等">
+<meta name="twitter:image" content="http://www.wangdongbing.com/2020/06/01/elasticSearch学习笔记/ES架构原理/es系统架构.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://www.wangdongbing.com/2020/06/01/elasticSearch学习笔记/ES架构原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>elasticsearch架构原理 | 好好学习,天天向上</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">好好学习,天天向上</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2020/06/01/elasticSearch学习笔记/ES架构原理/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="WDB">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好学习,天天向上">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">elasticsearch架构原理
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-06-01 11:15:08" itemprop="dateCreated datePublished" datetime="2020-06-01T11:15:08+08:00">2020-06-01</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-06-17 18:10:16" itemprop="dateModified" datetime="2020-06-17T18:10:16+08:00">2020-06-17</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/elasticsearch/" itemprop="url" rel="index"><span itemprop="name">elasticsearch</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>elasticsearch是一个基于Lucene的分布式搜索引擎，能够支持准实时的数据检索NRT(near real-time),支持海量数据的处理，包括结构化和非结构化数据，提供强大的全文搜索能力，但是ES不仅仅是一个全文搜索引擎，他能够解决传统数据库解决不了的复杂查询，计算，聚合等操作，还有时序数据的处理，比如日志处理、监控数据的存储、分析和可视化等<br><a id="more"></a></p>
+<h2 id="总体结构"><a href="#总体结构" class="headerlink" title="总体结构"></a>总体结构</h2><p><img src="/2020/06/01/elasticSearch学习笔记/ES架构原理/es系统架构.png" alt="avatar"></p>
+<p>1: Gateway是ES用来存储索引的文件系统，支持多种类型。包括本地文件系统(默认)，HDFS，S3等<br>2: Distributed Lucene Directory是一个分布式的lucene框架<br>3: Lucene之上是ES的模块，包括：索引模块、搜索模块、映射解析模块等<br>4: ES模块之上是 Discovery、Scripting和第三方插件<br>5: Discovery是ES的节点发现模块，不同机器上的ES节点要组成集群需要进行消息通信，集群内部需要选举master节点，这些工作都是由Discovery模块完成。支持多种发现机制，如 Zen 、EC2、gce、Azure。<br>6: Scripting用来支持在查询语句中插入javascript、python等脚本语言，scripting模块负责解析这些脚本，使用脚本语句性能稍低。ES也支持多种第三方插件。预先定义好脚本内容，然后在mapping阶段或者search指定需要的脚本，相对于脚本语句查询来说提高性能<br>7: 再上层是ES的传输模块和JMX.传输模块支持多种传输协议，如 Thrift、memecached、http，默认使用http。JMX是java的管理框架，用来管理ES应用。<br>8: 最上层是ES提供给用户的接口，可以通过RESTful接口或java api和ES集群进行交互</p>
+<h2 id="集群模式"><a href="#集群模式" class="headerlink" title="集群模式"></a>集群模式</h2><p>elasticsearch集群实现介于P2P和master-slave的方式，具体有以下几种节点类型</p>
+<h3 id="Master-eligible-node"><a href="#Master-eligible-node" class="headerlink" title="Master-eligible node"></a>Master-eligible node</h3><p>Master节点用于管理和控制Elasticsearch集群，并负责在集群范围内创建删除索引，跟踪哪些节点是集群的一部分，并将分片分配给这些节点。主节点一次处理一个集群状态，并将状态广播到所有其他节点，这些节点需要响应并确认主节点的信息。<br>node.master=true  表示该节点有资格成为master节点</p>
+<h3 id="Data-node"><a href="#Data-node" class="headerlink" title="Data node"></a>Data node</h3><p>数据节点保存数据并执行与数据相关的操作，如CRUD、搜索和聚合，默认情况下，node.data=true，表示每个节点都为一个data节点，如果您想要一个专用的master节点，那么将node.data属性更改为false。通常在大型的集群这么做，master只做控制节点<br>node.data=true 表示该节点为data节点，默认为true</p>
+<h3 id="Ingest-node"><a href="#Ingest-node" class="headerlink" title="Ingest node"></a>Ingest node</h3><p>摄取节点（或者预处理节点）能够在索引操作之前对document进行增强或者丰富等预处理操作，默认node.ingest: true<br>预处理类似于ETL操作，该操作发生在bulk和index之前，通过pipeline和processor的方式实现，非常类似于logstash的filter，但它应该是elasticsearch锦上添花的能力，对于多源头，复杂的，量大的操作还是需要logstash来完成</p>
+<h3 id="Tribe-node"><a href="#Tribe-node" class="headerlink" title="Tribe node"></a>Tribe node</h3><p>Tribe node是一种特殊的coordinating node，它可以连接到多个集群，并在多个集群上执行搜索或者其他操作，对于涉及到多个集群之间的查询，可以使用tribel node的方式， 但是tribel node是以coordinating node的方式加入到各个集群中，master的变更任务必须要等Tribe node的返回，tribe的问题显而易见， 所以elasticsearch在高版本引入了Cross Cluster Search </p>
+<h3 id="coordinating-node"><a href="#coordinating-node" class="headerlink" title="coordinating node"></a>coordinating node</h3><p>所有节点默认为coordinating node，并且不可以关闭，该节点作为负载路由器，将传入的请求路由到集群中的不同节点。coordinating node节点处理客户端的请求一般分为两个阶段，第一节点，收到客户端的请求并路由到合适的分片（包含请求数据的主分片），第二阶段对结果做聚合<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cluster.routing.allocation.enable</span><br><span class="line">all - （默认值）允许为所有类型的分片分配分片。</span><br><span class="line">primaries - 仅允许分配主分片的分片。</span><br><span class="line">new_primaries - 仅允许为新索引的主分片分配分片。</span><br><span class="line">none - 任何索引都不允许任何类型的分片。</span><br><span class="line">`</span><br></pre></td></tr></table></figure></p>
+<h2 id="Allocation-amp-Rebalancing"><a href="#Allocation-amp-Rebalancing" class="headerlink" title="Allocation &amp; Rebalancing"></a>Allocation &amp; Rebalancing</h2><p><img src="/2020/06/01/elasticSearch学习笔记/ES架构原理/es分片结构.png" alt="avatar"></p>
+<h3 id="Allocation"><a href="#Allocation" class="headerlink" title="Allocation"></a>Allocation</h3><p>Allocation是指将分片分配给某个节点的过程，包括分配主分片或者副本。如果是副本，还包含从主分片复制数据的过程。<br>Allocation操作发生在故障恢复，副本分配，Rebalancing，节点的新增和删除等场景，master节点的主要职责就是决定分片分配到哪一个节点，并且做分片的迁移来平衡集群</p>
+<h3 id="Shard-allocation-filters"><a href="#Shard-allocation-filters" class="headerlink" title="Shard allocation filters"></a>Shard allocation filters</h3><p>allocation filters允许执行分片分配之前，前置一些filter操作，可以基于_name, _host_ip, _publish_ip, _ip, _host and _id 等属性，例如计划下线一个node，可以设置不允许给该node分配分片：<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">PUT _cluster/settings</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"transient"</span> : &#123;</span><br><span class="line">    <span class="attr">"cluster.routing.allocation.exclude._ip"</span> : <span class="string">"10.0.0.1"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="disk-based-shard-allocation"><a href="#disk-based-shard-allocation" class="headerlink" title="disk-based shard allocation"></a>disk-based shard allocation</h3><p>es在进行shard allocation的时候，会充分考虑每一个node的可用磁盘空间，具体有如下配置:</p>
+<p>1: cluster.routing.allocation.disk.threshold_enabled：默认是true，如果是false会禁用基于disk的考虑<br>2: cluster.routing.allocation.disk.watermark.low：控制磁盘使用率的低水位，默认是85%，如果一个节点的磁盘空间使用率已经超过了85%，那么就不会分配shard给这个node了<br>3: cluster.routing.allocation.disk.watermark.high：控制磁盘使用率的高水位，默认是90%，如果一个节点的磁盘空间使用率已经超过90%了，那么就会将这个node上的部分shard移动走<br>4: cluster.info.update.interval：es检查集群中每个node的磁盘使用率的时间间隔，默认是30s<br>5: cluster.routing.allocation.disk.include_relocations：默认是true，意味着es在计算一个node的磁盘使用率的时候，会考虑正在分配给这个node的shard。</p>
+<h3 id="Rebalancing"><a href="#Rebalancing" class="headerlink" title="Rebalancing"></a>Rebalancing</h3><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cluster.routing.rebalance.enable</span><br><span class="line">all - (default) 允许所有分片rebalance</span><br><span class="line">primaries - 只允许主分片rebalance</span><br><span class="line">replicas - 只允许副分片rebalance</span><br><span class="line">none - 任何分片都不允许</span><br></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cluster.routing.allocation.allow_rebalance</span><br><span class="line">always - 始终允许重新平衡。</span><br><span class="line">indices_primaries_active - 仅在所有主分片激活时（allocated）</span><br><span class="line">indices_all_active - （默认）仅当所有分片都激活时（allocated）</span><br><span class="line"></span><br><span class="line">`</span><br></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cluster.routing.allocation.cluster_concurrent_rebalance</span><br><span class="line">允许控制群集范围内允许的并发分片重新平衡数。 默认为2。</span><br></pre></td></tr></table></figure>
+<h3 id="路由规则"><a href="#路由规则" class="headerlink" title="路由规则"></a>路由规则</h3><p>协调节点(coordinating node)通过文档id的hash值（murmur3散列函数）和主分片数量（Primary shard）取模，确定文档应被索引到哪个分片。shard = hash(document_id) % (num_of_primary_shards)</p>
+<h2 id="高可用"><a href="#高可用" class="headerlink" title="高可用"></a>高可用</h2><h3 id="cluster-stat"><a href="#cluster-stat" class="headerlink" title="cluster stat"></a>cluster stat</h3><p>es集群的高可用通过cluster stat来实现，cluster state是全局性信息， 包含了整个群集中所有分片的元信息(规则，位置， 大小等信息)， 并保持每个每节的信息同步。cluster state是由ES的master节点维护的（只有主节点能够改变集群状态）， 当它收到data节点的状态更新变化后， 就把这些信息依次广播到其他节点，同步集群状态的时候，ES会做些额外的处理：只有变化的cluster state信息才会被广播，在cluster state传递之前或做些压缩<br>具体的过程如下所示：<br>1: 主节点处理一个改变的集群状态，并将改变的状态publish给所有的其他节点。<br>2: 其他节点收到主节点publish的message，向主节点确认收到信息(acknowledge。 it)，但不将改变同步到本地的集群状态(not applay it)<br>3: 如果主节点在配置的时间(discovery.zen.commit_timeout 默认30s)没有收到指定个数节点(discovery.zen.minimum_master_nodes)的确认信息，那么该改变的状态就会被rejected。<br>4: 如果主节点在指定的时间内收到了指定个数节点的确认信息，则会提交（commit）该状态的改变，并向其他的节点发送该改变。<br>5: 其他的节点收到信息后，则应用该改变到本地的集群状态中，应用后向主节点发送应用成功信息。<br>6: 主节点等待所有节点的发送的应用成功消息，直到超时(discovery.zen.publish_timeout 默认30s)。</p>
+<h2 id="节点加入与离开"><a href="#节点加入与离开" class="headerlink" title="节点加入与离开"></a>节点加入与离开</h2><h3 id="节点加入"><a href="#节点加入" class="headerlink" title="节点加入"></a>节点加入</h3><p>当一个新节点加入的时候，它通过discovery.zen.ping.unicast.hosts配置的节点获取集群状态，然后找到master节点，并向其发送一个join request(discovery.zen.join_timeout)。主节点接收到reqest后，同步集群状态到新节点。</p>
+<h3 id="非主节点节点离开"><a href="#非主节点节点离开" class="headerlink" title="非主节点节点离开"></a>非主节点节点离开</h3><p>当一个节点出现3次ping不通的情况时（ping_interval 默认为1s；ping_timeout 默认为30s），主节点会认为该节点已宕机，将该节点踢出集群。</p>
+<h3 id="主节点离开"><a href="#主节点离开" class="headerlink" title="主节点离开"></a>主节点离开</h3><p>当主节点发生故障时，集群中的其他节点将会ping当前的master eligible 节点，并从中选出一个新的主节点。</p>
+<h3 id="选主过程"><a href="#选主过程" class="headerlink" title="选主过程"></a>选主过程</h3><ul>
+<li>节点启动之后，从配置文件获取集群列表，discovery.zen.ping.unicast.hosts: [“host1”, “host2”]</li>
+<li>Ping的response会包含该节点的基本信息以及该节点认为的master节点，先从各节点认为的master中选，按照节点id排序，取第一个。</li>
+<li>如果各节点都没有认为的master，则从所有节点中选择，规则同上。</li>
+<li>通过discovery.zen.minimum_master_nodes这个参数设置为(N/2)+1，避免因为网络分区而产生脑裂。</li>
+</ul>
+<h2 id="NRT-near-real-time"><a href="#NRT-near-real-time" class="headerlink" title="NRT(near real-time)"></a>NRT(near real-time)</h2><p>es的准实时在于在写入数据的时候，采用内存buff+文件系统缓存+磁盘三级结构，确保写入的数据能够近实时的被检索到，整个过程如下</p>
+<ul>
+<li>新收到的数据存放于内存buff中，同时将数据写入translog日志文件，这个时候是检索不到的</li>
+<li>数据从内存buff刷新到文件系统缓存中（OS cache），refresh默认1s，生成一个新的segment，清空内存数据，这个时候可以被检索到了</li>
+<li>默认每隔30分钟或者translog大于512MB，执行一个flush操作，首先将commit point写入磁盘文件，标识这个commit point对应的所有的segment file，同时强行将os cache中目前所有的数据都fsync到磁盘文件中去。最后清空现有translog日志文件，重启一个translog，此时commit操作完成。</li>
+</ul>
+<h2 id="数据一致性"><a href="#数据一致性" class="headerlink" title="数据一致性"></a>数据一致性</h2><ul>
+<li>ES的数据写入一致性由translog保证</li>
+<li>translog文件本身也是先写os cache，然后再刷到磁盘的，默认5s，如果宕机，可能会有5s的数据都是，当然不如不考虑性能的影响，可以设置每次写操作都刷到磁盘吗</li>
+<li>副本一致性则采用半同步的方式，即主分片写入之后，只要一定数量副分片返回写入成功，则返回客户端成功，wait_for_active_shards的默认值为int( (primary + number_of_replicas) / 2 ) + 1</li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/中间件/" rel="tag"># 中间件</a>
+          
+            <a href="/tags/elasticsearch/" rel="tag"># elasticsearch</a>
+          
+            <a href="/tags/搜索/" rel="tag"># 搜索</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/04/21/kafka使用学习笔记/" rel="next" title="Kafka使用学习笔记">
+                <i class="fa fa-chevron-left"></i> Kafka使用学习笔记
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/06/17/elasticSearch学习笔记/ES日常最佳实践/" rel="prev" title="elasticsearch最佳实践">
+                elasticsearch最佳实践 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">WDB</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">34</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#总体结构"><span class="nav-number">1.</span> <span class="nav-text">总体结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群模式"><span class="nav-number">2.</span> <span class="nav-text">集群模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Master-eligible-node"><span class="nav-number">2.1.</span> <span class="nav-text">Master-eligible node</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-node"><span class="nav-number">2.2.</span> <span class="nav-text">Data node</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ingest-node"><span class="nav-number">2.3.</span> <span class="nav-text">Ingest node</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Tribe-node"><span class="nav-number">2.4.</span> <span class="nav-text">Tribe node</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#coordinating-node"><span class="nav-number">2.5.</span> <span class="nav-text">coordinating node</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Allocation-amp-Rebalancing"><span class="nav-number">3.</span> <span class="nav-text">Allocation &amp; Rebalancing</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Allocation"><span class="nav-number">3.1.</span> <span class="nav-text">Allocation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Shard-allocation-filters"><span class="nav-number">3.2.</span> <span class="nav-text">Shard allocation filters</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#disk-based-shard-allocation"><span class="nav-number">3.3.</span> <span class="nav-text">disk-based shard allocation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Rebalancing"><span class="nav-number">3.4.</span> <span class="nav-text">Rebalancing</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#路由规则"><span class="nav-number">3.5.</span> <span class="nav-text">路由规则</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#高可用"><span class="nav-number">4.</span> <span class="nav-text">高可用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#cluster-stat"><span class="nav-number">4.1.</span> <span class="nav-text">cluster stat</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#节点加入与离开"><span class="nav-number">5.</span> <span class="nav-text">节点加入与离开</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#节点加入"><span class="nav-number">5.1.</span> <span class="nav-text">节点加入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#非主节点节点离开"><span class="nav-number">5.2.</span> <span class="nav-text">非主节点节点离开</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#主节点离开"><span class="nav-number">5.3.</span> <span class="nav-text">主节点离开</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#选主过程"><span class="nav-number">5.4.</span> <span class="nav-text">选主过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NRT-near-real-time"><span class="nav-number">6.</span> <span class="nav-text">NRT(near real-time)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据一致性"><span class="nav-number">7.</span> <span class="nav-text">数据一致性</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">WDB</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/schemes/muse.js?v=7.0.1"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
