@@ -110,7 +110,7 @@
 <meta property="og:site_name" content="好好学习,天天向上">
 <meta property="og:description" content="kafka是由Linkedin开源的一个分布式流式系统，它的最大的特性就是可以实时的处理大量数据以满足各种需求场景：比如基于hadoop的批处理系统、低延迟的实时系统、storm/Spark流式处理引擎，web/nginx日志、访问日志，消息服务等等，通常我们使用过程中以消息系统来使用，kafka有很多优势，比如高可用，高吞吐等，在这里简单记录一下对一些特性的理解和学习">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-04-23T09:24:17.911Z">
+<meta property="og:updated_time" content="2020-04-23T09:29:22.241Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Kafka使用学习笔记">
 <meta name="twitter:description" content="kafka是由Linkedin开源的一个分布式流式系统，它的最大的特性就是可以实时的处理大量数据以满足各种需求场景：比如基于hadoop的批处理系统、低延迟的实时系统、storm/Spark流式处理引擎，web/nginx日志、访问日志，消息服务等等，通常我们使用过程中以消息系统来使用，kafka有很多优势，比如高可用，高吞吐等，在这里简单记录一下对一些特性的理解和学习">
@@ -406,7 +406,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2020-04-23 17:24:17" itemprop="dateModified" datetime="2020-04-23T17:24:17+08:00">2020-04-23</time>
+                <time title="修改时间：2020-04-23 17:29:22" itemprop="dateModified" datetime="2020-04-23T17:29:22+08:00">2020-04-23</time>
               
             
           </span>
@@ -493,7 +493,7 @@
 <h3 id="Exactly-once"><a href="#Exactly-once" class="headerlink" title="Exactly once"></a>Exactly once</h3><h4 id="Producer-2"><a href="#Producer-2" class="headerlink" title="Producer"></a>Producer</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">- enable.idempotence=true。enable.idempotence </span><br><span class="line">- acks=all</span><br></pre></td></tr></table></figure>
 <p>该配置项表示是否使用幂等性。当enable.idempotence配置为true时，acks必须配置为all。并且建议max.in.flight.requests.per.connection的值小于5。<br>acks=all 表示等leader和follower节点都写入消息才返回确认</p>
 <p>首先kafka本身支持At least once消息送达语义，要在生产端支持有且仅有一次的语义，就需要发送消息的时候实现幂等，要实现消息发送的幂等关键是要实现Broker端消息的去重。具体是用PID和Sequence Numbler来实现</p>
-<p>PID是指：每个新的Producer在初始化的时候会被分配一个唯一的PID，这个PID对用户是不可见的。<br>Sequence Numbler：对于每个PID，该Producer发送数据的每个&lt;Topic, Partition&gt;都对应一个从0开始单调递增的Sequence Number，Broker端在缓存中保存了这Sequence Numbler，对于接收的每条消息，如果其序号比Broker缓存中序号大于1则接受它（req seq num = seq num + 1），否则将其丢弃。这样就可以实现了消息重复提交了。</p>
+<p>PID是指：每个新的Producer在初始化的时候会被分配一个唯一的PID，这个PID对用户是不可见的。<br>Sequence Numbler：对于每个PID，该Producer发送数据的每个&lt;Topic, Partition&gt;都对应一个从0开始单调递增的Sequence Number，Broker端在缓存中保存了这Sequence Numbler，对于接收的每条消息，如果其序号比Broker缓存中序号大于1则接受它（req seqnum = seqnum + 1），否则将其丢弃。这样就可以实现了消息重复提交了。</p>
 <h4 id="Consumer-2"><a href="#Consumer-2" class="headerlink" title="Consumer"></a>Consumer</h4><p>事务，kafka consumer对于Exactly once语义的实现可以通过事务来做，即消费消息和提交消费者offset放在一个事务中，保证原子性，但是前提是配置事务隔离级别为<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">isolation.level=read_committed</span><br></pre></td></tr></table></figure></p>
 <p>read_committed：可以同时读取事务执行过程中的部分写入数据和已经完整提交的事务写入数据；<br>read_uncommitted：完全不等待事务提交，按照offsets order去读取消息，也就是兼容0.11.x版本前Kafka的语义（kafka事务特性在0.11版本之后引入）；</p>
 <h2 id="一些常用命令"><a href="#一些常用命令" class="headerlink" title="一些常用命令"></a>一些常用命令</h2><p>启动服务<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">. /kafka -server -start.sh.. / config / server.properties 1 &gt; /dev/null 2&gt;&amp;1 &amp;</span><br></pre></td></tr></table></figure></p>
