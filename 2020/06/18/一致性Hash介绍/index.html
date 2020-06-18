@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5">
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="在分布式系统中，数据分片的方法主要有取模/划段/一致性hash等方式，前两种有很大的一个问题就是在分布式系统节点发生变更的时候，比如新增和删除，数据需要重新分片和迁移，也就是说不能弹性的扩容和缩容，一致性hash方式则在很大程度上避免了上述问题那么一致性hash是怎么解决这个问题的呢？一致性hash：对节点和数据，都做一次hash运算，然后比较节点和数据的hash值，数据值和节点最相近的节点作为处">
+<meta name="keywords" content="一致性hash,分布式,一致性">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一致性hash介绍">
+<meta property="og:url" content="http://www.wangdongbing.com/2020/06/18/一致性Hash介绍/index.html">
+<meta property="og:site_name" content="好好学习,天天向上">
+<meta property="og:description" content="在分布式系统中，数据分片的方法主要有取模/划段/一致性hash等方式，前两种有很大的一个问题就是在分布式系统节点发生变更的时候，比如新增和删除，数据需要重新分片和迁移，也就是说不能弹性的扩容和缩容，一致性hash方式则在很大程度上避免了上述问题那么一致性hash是怎么解决这个问题的呢？一致性hash：对节点和数据，都做一次hash运算，然后比较节点和数据的hash值，数据值和节点最相近的节点作为处">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/06/18/一致性Hash介绍/hash1.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/06/18/一致性Hash介绍/hash2.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/06/18/一致性Hash介绍/hash3.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/06/18/一致性Hash介绍/hash4.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/06/18/一致性Hash介绍/hash5.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/06/18/一致性Hash介绍/hash6.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/06/18/一致性Hash介绍/hash7.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/06/18/一致性Hash介绍/hash7.png">
+<meta property="og:updated_time" content="2020-06-18T05:55:18.300Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="一致性hash介绍">
+<meta name="twitter:description" content="在分布式系统中，数据分片的方法主要有取模/划段/一致性hash等方式，前两种有很大的一个问题就是在分布式系统节点发生变更的时候，比如新增和删除，数据需要重新分片和迁移，也就是说不能弹性的扩容和缩容，一致性hash方式则在很大程度上避免了上述问题那么一致性hash是怎么解决这个问题的呢？一致性hash：对节点和数据，都做一次hash运算，然后比较节点和数据的hash值，数据值和节点最相近的节点作为处">
+<meta name="twitter:image" content="http://www.wangdongbing.com/2020/06/18/一致性Hash介绍/hash1.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://www.wangdongbing.com/2020/06/18/一致性Hash介绍/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>一致性hash介绍 | 好好学习,天天向上</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">好好学习,天天向上</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2020/06/18/一致性Hash介绍/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="WDB">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好学习,天天向上">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">一致性hash介绍
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-06-18 11:40:45 / 修改时间：13:55:18" itemprop="dateCreated datePublished" datetime="2020-06-18T11:40:45+08:00">2020-06-18</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/常用算法/" itemprop="url" rel="index"><span itemprop="name">常用算法</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在分布式系统中，数据分片的方法主要有取模/划段/一致性hash等方式，前两种有很大的一个问题就是在分布式系统节点发生变更的时候，比如新增和删除，数据需要重新分片和迁移，也就是说不能弹性的扩容和缩容，一致性hash方式则在很大程度上避免了上述问题<br>那么一致性hash是怎么解决这个问题的呢？<br>一致性hash：对节点和数据，都做一次hash运算，然后比较节点和数据的hash值，数据值和节点最相近的节点作为处理节点。为了分布得更均匀，通过使用虚拟节点的方式，每个节点计算出n个hash值，均匀地放在hash环上这样数据就能比较均匀地分布到每个节点。<br><a id="more"></a></p>
+<p>一致性hash算法通过一个叫作一致性hash环的数据结构实现。这个环的起点是0，终点是2^32-1，并且起点与终点连接，环的中间的整数按逆时针分布，故这个环的整数分布范围是[0, 2^32-1]，如下图1所示：<br><img src="/2020/06/18/一致性Hash介绍/hash1.png" alt="avatar"></p>
+<h2 id="将对象放置到Hash环"><a href="#将对象放置到Hash环" class="headerlink" title="将对象放置到Hash环"></a>将对象放置到Hash环</h2><p>假设现在我们有4个对象，分别为o1，o2，o3，o4，使用hash函数计算这4个对象的hash值（范围为0 ~ 2^32-1）:<br>hash(o1) = m1<br>hash(o2) = m2<br>hash(o3) = m3<br>hash(o4) = m4<br>把m1，m2，m3，m4这4个值放置到hash环上，得到如下图2：<br><img src="/2020/06/18/一致性Hash介绍/hash2.png" alt="avatar"></p>
+<h2 id="将机器放置到Hash环"><a href="#将机器放置到Hash环" class="headerlink" title="将机器放置到Hash环"></a>将机器放置到Hash环</h2><p>使用同样的hash函数，我们将机器也放置到hash环上。假设我们有三台缓存机器，分别为 c1，c2，c3，使用hash函数计算这3台机器的hash值：<br>hash(c1) = t1<br>hash(c2) = t2<br>hash(c3) = t3<br>把t1，t2，t3 这3个值放置到hash环上，得到如下图3：<br><img src="/2020/06/18/一致性Hash介绍/hash3.png" alt="avatar"></p>
+<h2 id="为对象选择机器"><a href="#为对象选择机器" class="headerlink" title="为对象选择机器"></a>为对象选择机器</h2><p>将对象和机器都放置到同一个hash环后，在hash环上顺时针查找距离这个对象的hash值最近的机器，即是这个对象所属的机器。例如，对于对象o2，顺序针找到最近的机器是c1，故机器c1会缓存对象o2。而机器c2则缓存o3，o4，机器c3则缓存对象o1。<br><img src="/2020/06/18/一致性Hash介绍/hash4.png" alt="avatar"></p>
+<h2 id="处理机器增减的情况"><a href="#处理机器增减的情况" class="headerlink" title="处理机器增减的情况"></a>处理机器增减的情况</h2><p>对于线上的业务，增加或者减少一台机器的部署是常有的事情。例如，增加机器c4的部署并将机器c4加入到hash环的机器c3与c2之间。这时，只有机器c3与c4之间的对象需要重新分配新的机器。对于我们的例子，只有对象o4被重新分配到了c4，其他对象仍在原有机器上。如图5所示：<br><img src="/2020/06/18/一致性Hash介绍/hash5.png" alt="avatar"></p>
+<p>如上文前面所述，使用简单的求模方法，当新添加机器后会导致大部分缓存失效的情况，使用一致性hash算法后这种情况则会得到大大的改善。前面提到3台机器变成4台机器后，缓存命中率只有25%（不命中率75%）。而使用一致性hash算法，理想情况下缓存命中率则有75%，而且，随着机器规模的增加，命中率会进一步提高，99台机器增加一台后，命中率达到99%，这大大减轻了增加缓存机器带来的数据库访问的压力。</p>
+<p>再例如，将机器c1下线（当然，也有可能是机器c1宕机），这时，只有原有被分配到机器c1对象需要被重新分配到新的机器。对于我们的例子，只有对象o2被重新分配到机器c3，其他对象仍在原有机器上。如图6所示：<br><img src="/2020/06/18/一致性Hash介绍/hash6.png" alt="avatar"></p>
+<h2 id="虚拟节点"><a href="#虚拟节点" class="headerlink" title="虚拟节点"></a>虚拟节点</h2><p>上面提到的过程基本上就是一致性hash的基本原理了，不过还有一个小小的问题。新加入的机器c4只分担了机器c2的负载，机器c1与c3的负载并没有因为机器c4的加入而减少负载压力。如果4台机器的性能是一样的，那么这种结果并不是我们想要的。为此，我们引入虚拟节点来解决负载不均衡的问题。将每台物理机器虚拟为一组虚拟机器，将虚拟机器放置到hash环上，如果需要确定对象的机器，先确定对象的虚拟机器，再由虚拟机器确定物理机器。说得有点复杂，其实过程也很简单。<br>还是使用上面的例子，假如开始时存在缓存机器c1，c2，c3，对于每个缓存机器，都有3个虚拟节点对应，其一致性hash环结构如图7所示：<br><img src="/2020/06/18/一致性Hash介绍/hash7.png" alt="avatar"></p>
+<p>假设对于对象o1，其对应的虚拟节点为c11，而虚拟节点c11对象缓存机器c1，故对象o1被分配到机器c1中。<br>新加入缓存机器c4，其对应的虚拟节点为c41，c42，c43，将这三个虚拟节点添加到hash环中，得到的hash环结构如图8所示：<br><img src="/2020/06/18/一致性Hash介绍/hash7.png" alt="avatar"></p>
+<p>新加入的缓存机器c4对应一组虚拟节点c41，c42，c43，加入到hash环后，影响的虚拟节点包括c31，c22，c11（顺时针查找到第一个节点），而这3个虚拟节点分别对应机器c3，c2，c1。即新加入的一台机器，同时影响到原有的3台机器。理想情况下，新加入的机器平等地分担了原有机器的负载，这正是虚拟节点带来的好处。而且新加入机器c4后，只影响25%（1/4）对象分配，也就是说，命中率仍然有75%，这跟没有使用虚拟节点的一致性hash算法得到的结果是相同的。</p>
+<p>总结<br>一致性hash算法解决了分布式环境下机器增加或者减少时，简单的取模运算无法获取较高命中率的问题。通过虚拟节点的使用，一致性hash算法可以均匀分担机器的负载，使得这一算法更具现实的意义。正因如此，一致性hash算法被广泛应用于分布式系统中。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/一致性hash/" rel="tag"># 一致性hash</a>
+          
+            <a href="/tags/分布式/" rel="tag"># 分布式</a>
+          
+            <a href="/tags/一致性/" rel="tag"># 一致性</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/18/Redis学习/Redis集群模式介绍/" rel="next" title="Redis集群模式介绍">
+                <i class="fa fa-chevron-left"></i> Redis集群模式介绍
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/06/18/java/AQS原理分析/" rel="prev" title="AQS介绍">
+                AQS介绍 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">WDB</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#将对象放置到Hash环"><span class="nav-number">1.</span> <span class="nav-text">将对象放置到Hash环</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#将机器放置到Hash环"><span class="nav-number">2.</span> <span class="nav-text">将机器放置到Hash环</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为对象选择机器"><span class="nav-number">3.</span> <span class="nav-text">为对象选择机器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#处理机器增减的情况"><span class="nav-number">4.</span> <span class="nav-text">处理机器增减的情况</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟节点"><span class="nav-number">5.</span> <span class="nav-text">虚拟节点</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">WDB</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/schemes/muse.js?v=7.0.1"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

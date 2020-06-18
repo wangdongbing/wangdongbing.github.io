@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5">
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Redis在不同的版本中有不同的集群方案，各个使用方在使用集群模式的时候也各自有自身的一些解决方案，下面是对目前比较常用的集群解决方案和模式的学习">
+<meta name="keywords" content="中间件,Redis,缓存">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis集群模式介绍">
+<meta property="og:url" content="http://www.wangdongbing.com/2020/06/18/Redis学习/Redis集群模式介绍/index.html">
+<meta property="og:site_name" content="好好学习,天天向上">
+<meta property="og:description" content="Redis在不同的版本中有不同的集群方案，各个使用方在使用集群模式的时候也各自有自身的一些解决方案，下面是对目前比较常用的集群解决方案和模式的学习">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/06/18/Redis学习/Redis集群模式介绍/Redis-cluster1.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/06/18/Redis学习/Redis集群模式介绍/Redis-cluster2.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/06/18/Redis学习/Redis集群模式介绍/Redis-cluster3.png">
+<meta property="og:updated_time" content="2020-06-18T03:02:37.232Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redis集群模式介绍">
+<meta name="twitter:description" content="Redis在不同的版本中有不同的集群方案，各个使用方在使用集群模式的时候也各自有自身的一些解决方案，下面是对目前比较常用的集群解决方案和模式的学习">
+<meta name="twitter:image" content="http://www.wangdongbing.com/2020/06/18/Redis学习/Redis集群模式介绍/Redis-cluster1.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://www.wangdongbing.com/2020/06/18/Redis学习/Redis集群模式介绍/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Redis集群模式介绍 | 好好学习,天天向上</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">好好学习,天天向上</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2020/06/18/Redis学习/Redis集群模式介绍/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="WDB">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好学习,天天向上">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Redis集群模式介绍
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-06-18 10:07:24 / 修改时间：11:02:37" itemprop="dateCreated datePublished" datetime="2020-06-18T10:07:24+08:00">2020-06-18</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Redis/" itemprop="url" rel="index"><span itemprop="name">Redis</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Redis在不同的版本中有不同的集群方案，各个使用方在使用集群模式的时候也各自有自身的一些解决方案，下面是对目前比较常用的集群解决方案和模式的学习<br><a id="more"></a></p>
+<h1 id="Redis-Cluster"><a href="#Redis-Cluster" class="headerlink" title="Redis Cluster"></a>Redis Cluster</h1><h2 id="Redis-集群方案的演变"><a href="#Redis-集群方案的演变" class="headerlink" title="Redis 集群方案的演变"></a>Redis 集群方案的演变</h2><p>大规模数据存储系统都会面临的一个问题就是如何横向拓展。当你的数据集越来越大，一主多从的模式已经无法支撑这么大量的数据存储，于是你首先考虑将多个主从模式结合在一起对外提供服务，但是这里有两个问题就是如何实现数据分片的逻辑和在哪里实现这部分逻辑？业界常见的解决方案有两种，一是引入Proxy层来向应用端屏蔽身后的集群分布，客户端可以借助 Proxy 层来进行请求转发和 Key值的散列从而进行进行数据分片，这种方案会损失部分性能但是迁移升级等运维操作都很方便，业界Proxy方案的代表有Twitter的Twemproxy和豌豆荚的 Codis；二是 smart client 方案，即将 Proxy 的逻辑放在客户端做，客户端根据维护的映射规则和路由表直接访问特定的Redis实例，但是增减 Redis 实例都需要重新调整分片逻辑。</p>
+<h2 id="Redis-Cluster-简介"><a href="#Redis-Cluster-简介" class="headerlink" title="Redis Cluster 简介"></a>Redis Cluster 简介</h2><p>Redis 3.0 版本开始官方正式支持集群模式，Redis 集群模式提供了一种能将数据在多个节点上进行分区存储的方法，采取了和上述两者不同的实现方案——去中心化的集群模式，集群通过分片进行数据共享，分片内采用一主多从的形式进行副本复制，并提供复制和故障恢复功能。在官方文档 Redis Cluster Specification 中，作者详细介绍了官方集群模式的设计考量，主要有如下几点：</p>
+<ol>
+<li>性能, Redis集群模式采用去中心化的设计，即 P2P 而非之前业界衍生出的Proxy方式</li>
+<li>一致性, master与slave之间采用异步复制，存在数据不一致的时间窗口，保证高性能的同时牺牲了部分一致性</li>
+<li>水平扩展, 文中称可以线性扩展至 1000 个节点</li>
+<li>可用性, 在集群模式推出之前，主从模式的可用性要靠Sentinel保证，集群模式引入了新的故障检测机制，而在故障转移这块复用了Sentinel的代码逻辑，不需要单独启动一个Sentinel集群，Redis Cluster本身就能自动进行master选举和failover</li>
+</ol>
+<p>下图是一个三主三从的 Redis Cluster，三机房部署（其中一主一从构成一个分片，之间通过异步复制同步数据，一旦某个机房掉线，则分片上位于另一个机房的slave会被提升为master从而可以继续提供服务）；每个master负责一部分slot，数目尽量均摊；客户端对于某个Key操作先通过公式计算（计算方法见下文）出所映射到的 slot，然后直连某个分片，写请求一律走 master，读请求根据路由规则选择连接的分片节点<br><img src="/2020/06/18/Redis学习/Redis集群模式介绍/Redis-cluster1.png" alt="avatar"></p>
+<h2 id="三种集群方案的优缺点"><a href="#三种集群方案的优缺点" class="headerlink" title="三种集群方案的优缺点"></a>三种集群方案的优缺点</h2><p>集群模式 优点 缺点</p>
+<h3 id="客户端分片"><a href="#客户端分片" class="headerlink" title="客户端分片"></a>客户端分片</h3><ol>
+<li>优点：不使用第三方中间件，实现方法和代码可以自己掌控并且可随时调整。这种分片性能比代理式更好(因为少了分发环节)，分发压力在客户端，无服务端压力增加 </li>
+<li>缺点：不能平滑地水平扩容，扩容/缩容时，必须手动调整分片程序，出现故障不能自动转移，难以运维。</li>
+</ol>
+<h3 id="代理层分片"><a href="#代理层分片" class="headerlink" title="代理层分片"></a>代理层分片</h3><ol>
+<li>优点：运维成本低。业务方不用关心后端 Redis 实例，跟操作单点 Redis 实例一样。Proxy的逻辑和存储的逻辑是隔离的</li>
+<li>缺点：代理层多了一次转发，性能有所损耗；进行扩容/缩容时候，部分数据可能会失效，需要手动进行迁移，对运维要求较高，而且难以做到平滑的扩缩容；出现故障，不能自动转移，运维性很差。Codis做了诸多改进，相比于Twemproxy可用性和性能都好得多</li>
+</ol>
+<h3 id="Redis-Cluster-1"><a href="#Redis-Cluster-1" class="headerlink" title="Redis Cluster"></a>Redis Cluster</h3><ol>
+<li>优点：无中心节点，数据按照 slot 存储分布在多个 Redis 实例上，平滑的进行扩容/缩容节点，自动故障转移（节点之间通过Gossip协议交换状态信息,进行投票机制完成slave到master角色的提升）降低运维成本，提高了系统的可扩展性和高可用性</li>
+<li>缺点：开源版本缺乏监控管理，原生客户端太过简陋，failover节点的检测过慢，维护Membership的Gossip消息协议开销大，无法根据统计区分冷热数据</li>
+</ol>
+<h1 id="哈希槽"><a href="#哈希槽" class="headerlink" title="哈希槽"></a>哈希槽</h1><h2 id="什么是哈希槽"><a href="#什么是哈希槽" class="headerlink" title="什么是哈希槽"></a>什么是哈希槽</h2><p>Redis Cluster 中，数据分片借助哈希槽(下文均称 slot)来实现，集群预先划分16384个slot，对于每个请求集群的键值对，根据Key进行散列生成的值唯一匹配一个slot。Redis Cluster 中每个分片的 master 负责 16384 个 slot 中的一部分，当且仅当每个 slot 都有对应负责的节点时，集群才进入可用状态。当动态添加或减少节点时，需要将 16384 个 slot 做个再分配，slot 中的键值也要迁移。</p>
+<h2 id="哈希槽计算方法"><a href="#哈希槽计算方法" class="headerlink" title="哈希槽计算方法"></a>哈希槽计算方法</h2><p>计算公式<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HASH_SLOT = CRC16(key) mod <span class="number">16384</span></span><br></pre></td></tr></table></figure></p>
+<p>但是上述计算方法实际采用时，做了一些改变，改变的目的是为了支持哈希标签(Hash Tag),哈希标签是确保两个键都在同一个slot里的一种方式。为了实现哈希标签，slot是用另一种不同的方式计算的。简单来说，如果一个键包含一个“{…}”这样的模式，只有{和}之间的字符串会被用来做哈希以获取slot。但是由于可能出现多个{或}，计算的算法如下：<br>最终的计算方法<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">def <span class="title">HASH_SLOT</span><span class="params">(key)</span></span></span><br><span class="line"><span class="function">    s </span>= key.index <span class="string">"&#123;"</span></span><br><span class="line">    <span class="keyword">if</span> s</span><br><span class="line">        e = key.index <span class="string">"&#125;"</span>,s+<span class="number">1</span></span><br><span class="line">        <span class="keyword">if</span> e &amp;&amp; e != s+<span class="number">1</span></span><br><span class="line">            key = key[s+<span class="number">1.</span>.e<span class="number">-1</span>]</span><br><span class="line">        end</span><br><span class="line">    end</span><br><span class="line">    crc16(key) % <span class="number">16384</span></span><br><span class="line">end</span><br></pre></td></tr></table></figure></p>
+<p>​</p>
+<h2 id="哈希槽的内部实现"><a href="#哈希槽的内部实现" class="headerlink" title="哈希槽的内部实现"></a>哈希槽的内部实现</h2><p>Redis集群中每个节点都会维护集群中所有节点的clusterNode结构体，其中的slots属性是个二进制位数组，长度为2048bytes，共包含16384个bit位，节点可以根据某个bit的0/1值判断对应的slot是否由当前节点处理。每个节点通过clusterStats结构体来保存从自身视角看去的集群状态，其中nodes属性是一个保存节点名称和 clusterNode 指针的字典，而 slots 数组是一个记录哪个 slot 属于哪个 clusterNode 结构体的数组。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">clusterState</span> &#123;</span></span><br><span class="line">  ... ...</span><br><span class="line">    <span class="comment">// 保存集群节点的字典，键是节点名字，值是clusterNode结构的指针</span></span><br><span class="line">    dict *nodes;          <span class="comment">/* Hash table of name -&gt; clusterNode structures */</span></span><br><span class="line">  <span class="comment">// 槽和负责槽节点的映射</span></span><br><span class="line">    clusterNode *slots[CLUSTER_SLOTS];</span><br><span class="line">  ... ...</span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">clusterNode</span> &#123;</span></span><br><span class="line">  ... ...</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">char</span> slots[CLUSTER_SLOTS/<span class="number">8</span>]; <span class="comment">/* slots handled by this node */</span></span><br><span class="line">    <span class="keyword">int</span> numslots;   <span class="comment">/* Number of slots handled by this node */</span></span><br><span class="line">  ... ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​<br>完整的映射关系如图<br><img src="/2020/06/18/Redis学习/Redis集群模式介绍/Redis-cluster2.png" alt="avatar"></p>
+<h2 id="哈希槽的迁移"><a href="#哈希槽的迁移" class="headerlink" title="哈希槽的迁移"></a>哈希槽的迁移</h2><p>线上集群因为扩容和缩容操作，经常需要迁移slot对数据进行重新分片，原生的Redis Cluster可以借助redis-trib工具进行迁移slot在迁移过程有两个状态，在迁出节点会对该 slot 标记为 MIGRATING，在迁入节点会对该 slot 标记为 IMPORTING。当该 slot 内的 Key 都迁移完毕之后，新的 slot 归属信息都进过消息协议进行传播，最终集群中所有节点都会知道该 slot 已经迁移到了目标节点，并更新自身保存的 slot 和节点间的映射关系。</p>
+<h1 id="MOVED-amp-ASK"><a href="#MOVED-amp-ASK" class="headerlink" title="MOVED &amp; ASK"></a>MOVED &amp; ASK</h1><p>redis-cli 是官方提供的客户端脚本，我们可以通过 redis-cli -c -p port 命令连接任意一个 master，开始使用集群。</p>
+<h2 id="详解-MOVED"><a href="#详解-MOVED" class="headerlink" title="详解 MOVED"></a>详解 MOVED</h2><p>我们通过 redis-cli 可以发起对集群的读写请求，节点会计算我们请求的 Key 所属的 slot，一旦发现该 slot 并非由自己负责的话，会向客户端返回一个 MOVED 错误（需要注意的是集群模式下 redis-cli 不会打印 MOVED 错误而是会直接显示 Redirected，使用单机版 redis-cli 连接则可以看到 MOVED 错误），指引客户端重定向到正确的节点，并再次发送先前的命令，得到正确的结果。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//cluster 模式</span></span><br><span class="line"><span class="number">10.72</span><span class="number">.227</span><span class="number">.3</span>:<span class="number">6380</span>&gt; <span class="built_in">set</span> gfdsdf sdf</span><br><span class="line">-&gt; Redirected to slot [<span class="number">6901</span>] located at <span class="number">10.72</span><span class="number">.227</span><span class="number">.2</span>:<span class="number">6381</span></span><br><span class="line">OK</span><br><span class="line"><span class="comment">//stand alone 模式</span></span><br><span class="line"><span class="number">192.168</span><span class="number">.0</span><span class="number">.16</span>:<span class="number">6379</span>&gt; <span class="built_in">set</span> myKey myValue</span><br><span class="line">(error) MOVED <span class="number">16281</span> <span class="number">192.168</span><span class="number">.0</span><span class="number">.14</span>:<span class="number">6379</span></span><br><span class="line"><span class="number">192.168</span><span class="number">.0</span><span class="number">.16</span>:<span class="number">6379</span>&gt; get myKey</span><br><span class="line">(error) MOVED <span class="number">16281</span> <span class="number">192.168</span><span class="number">.0</span><span class="number">.14</span>:<span class="number">6379</span></span><br></pre></td></tr></table></figure>
+<p>​</p>
+<h2 id="详解-ASK"><a href="#详解-ASK" class="headerlink" title="详解 ASK"></a>详解 ASK</h2><p>MOVED 意为这个 slot 的负责已经永久转交给另一个节点，因此可以直接把请求准发给现在负责该 slot 的节点。但是考虑在 slot 迁移过程中，会出现属于该 slot 的一部分 Key 已经迁移到目的地节点，而另一部分 Key 还在源节点，那如果这时收到了关于这个 slot 的请求，那么源节点会现在自己的数据库里查找是否有这个 Key，查到的话说明还未迁移那么直接返回结果，查询失败的话就说明 Key 已经迁移到目的地节点，那么就向客户端返回一个 ASK 错误，指引客户端转向目的地节点查询该 Key。同样该错误仅在单机版 redis-cli 连接时打印。</p>
+<h2 id="客户端处理"><a href="#客户端处理" class="headerlink" title="客户端处理"></a>客户端处理</h2><p>这两个错误在实际线上环境中出现频率很高，那么定制化的客户端如何处理这二者呢？如果客户端每次都随机连接一个节点然后利用 MOVED 或者 ASK 来重定向其实是很低效的，所以一般客户端会在启动时通过解析 CLUSTER NODES 或者 CLUSTER SLOTS 命令返回的结果得到 slot 和节点的映射关系缓存在本地，一旦遇到 MOVED 或者 ASK 错误时会再次调用命令刷新本地路由（因为线上集群一旦出现 MOVED 或者是 ASK 往往是因为扩容分片导致数据迁移，涉及到许多 slot 的重新分配而非单个，因此需要整体刷新一次），这样集群稳定时可以直接通过本地路由表迅速找到需要连接的节点。</p>
+<h1 id="故障检测"><a href="#故障检测" class="headerlink" title="故障检测"></a>故障检测</h1><p>跟大多数分布式系统一样，Redis Cluster 的节点间通过持续的 heart beat 来保持信息同步，不过 Redis Cluster 节点信息同步是内部实现的，并不依赖第三方组件如 Zookeeper。集群中的节点持续交换 PING、PONG 数据，消息协议使用 Gossip，这两种数据包的数据结构一样，之间通过 type 字段进行区分。<br>Redis 集群中的每个节点都会定期向集群中的其他节点发送 PING 消息，以此来检测对方是否存活，如果接收 PING 消息的节点在规定时间内（node_timeout）没有回复 PONG 消息，那么之前向其发送 PING 消息的节点就会将其标记为疑似下线状态（PFAIL）。每次当节点对其他节点发送 PING 命令的时候，它都会随机地广播三个它所知道的节点的信息，这些信息里面的其中一项就是说明节点是否已经被标记为 PFAIL 或者 FAIL。当节点接收到其他节点发来的信息时，它会记下那些被集群中其他节点标记为 PFAIL 的节点，这称为失效报告（failure report）。如果节点已经将某个节点标记为 PFAIL ，并且根据自身记录的失效报告显示，集群中的大部分 master 也认为该节点进入了 PFAIL 状态，那么它会进一步将那个失效的 master 的状态标记为 FAIL 。随后它会向集群广播 “该节点进一步被标记为 FAIL ” 的这条消息，所有收到这条消息的节点都会更新自身保存的关于该 master 节点的状态信息为 FAIL。</p>
+<h1 id="故障转移（Failover）"><a href="#故障转移（Failover）" class="headerlink" title="故障转移（Failover）"></a>故障转移（Failover）</h1><h2 id="纪元（epoch）"><a href="#纪元（epoch）" class="headerlink" title="纪元（epoch）"></a>纪元（epoch）</h2><p>Redis Cluster 使用了类似于 Raft 算法 term（任期）的概念称为 epoch（纪元），用来给事件增加版本号。Redis 集群中的纪元主要是两种：currentEpoch 和 configEpoch。</p>
+<h3 id="currentEpoch"><a href="#currentEpoch" class="headerlink" title="currentEpoch"></a>currentEpoch</h3><p>这是一个集群状态相关的概念，可以当做记录集群状态变更的递增版本号。每个集群节点，都会通过 server.cluster-&gt;currentEpoch 记录当前的 currentEpoch。<br>集群节点创建时，不管是 master 还是 slave，都置 currentEpoch 为 0。当前节点接收到来自其他节点的包时，如果发送者的 currentEpoch（消息头部会包含发送者的 currentEpoch）大于当前节点的currentEpoch，那么当前节点会更新 currentEpoch 为发送者的 currentEpoch。因此，集群中所有节点的 currentEpoch 最终会达成一致，相当于对集群状态的认知达成了一致。</p>
+<h3 id="currentEpoch-作用"><a href="#currentEpoch-作用" class="headerlink" title="currentEpoch 作用"></a>currentEpoch 作用</h3><p>currentEpoch 作用在于，当集群的状态发生改变，某个节点为了执行一些动作需要寻求其他节点的同意时，就会增加 currentEpoch 的值。目前 currentEpoch 只用于 slave 的故障转移流程，这就跟哨兵中的sentinel.current_epoch 作用是一模一样的。当 slave A 发现其所属的 master 下线时，就会试图发起故障转移流程。首先就是增加 currentEpoch 的值，这个增加后的 currentEpoch 是所有集群节点中最大的。然后slave A 向所有节点发起拉票请求，请求其他 master 投票给自己，使自己能成为新的 master。其他节点收到包后，发现发送者的 currentEpoch 比自己的 currentEpoch 大，就会更新自己的 currentEpoch，并在尚未投票的情况下，投票给 slave A，表示同意使其成为新的 master。</p>
+<h3 id="configEpoch"><a href="#configEpoch" class="headerlink" title="configEpoch"></a>configEpoch</h3><p>这是一个集群节点配置相关的概念，每个集群节点都有自己独一无二的 configepoch。所谓的节点配置，实际上是指节点所负责的槽位信息。<br> 每一个 master 在向其他节点发送包时，都会附带其 configEpoch 信息，以及一份表示它所负责的 slots 信息。而 slave 向其他节点发送包时，其包中的 configEpoch 和负责槽位信息，是其 master 的 configEpoch 和负责的 slot 信息。节点收到包之后，就会根据包中的 configEpoch 和负责的 slots 信息，记录到相应节点属性中。</p>
+<h3 id="configEpoch-作用"><a href="#configEpoch-作用" class="headerlink" title="configEpoch 作用"></a>configEpoch 作用</h3><p> configEpoch 主要用于解决不同的节点的配置发生冲突的情况。举个例子就明白了：节点A 宣称负责 slot 1，其向外发送的包中，包含了自己的 configEpoch 和负责的 slots 信息。节点 C 收到 A 发来的包后，发现自己当前没有记录 slot 1 的负责节点（也就是 server.cluster-&gt;slots[1] 为 NULL），就会将 A 置为 slot 1 的负责节点（server.cluster-&gt;slots[1] = A），并记录节点 A 的 configEpoch。后来，节点 C 又收到了 B 发来的包，它也宣称负责 slot 1，此时，如何判断 slot 1 到底由谁负责呢？<br>这就是 configEpoch 起作用的时候了，C 在 B 发来的包中，发现它的 configEpoch，要比 A 的大，说明 B 是更新的配置。因此，就将 slot 1 的负责节点设置为 B（server.cluster-&gt;slots[1] = B）。在 slave 发起选举，获得足够多的选票之后，成功当选时，也就是 slave 试图替代其已经下线的旧 master，成为新的 master 时，会增加它自己的 configEpoch，使其成为当前所有集群节点的 configEpoch 中的最大值。这样，该 slave 成为 master 后，就会向所有节点发送广播包，强制其他节点更新相关 slots 的负责节点为自己。</p>
+<h2 id="自动-Failover"><a href="#自动-Failover" class="headerlink" title="自动 Failover"></a>自动 Failover</h2><p>当一个 slave 发现自己正在复制的 master 进入了已下线（FAIL）状态时，slave 将开始对已下线状态的 master 进行故障转移，以下是故障转移执行的步骤<br>该下线的 master 下所有 slave 中，会有一个 slave 被选中。具体的选举流程为：slave 自增它的 currentEpoch 值，然后向其他 masters 请求投票，每个 slave 都向集群其他节点广播一条 CLUSTERMSG_TYPE_FAILOVER_AUTH_REQUEST 消息用于拉票，集群中具有投票权的 master 收到消息后，如果在当前选举纪元中没有投过票，就会向第一个发送来消息的 slave 返回 CLUSTERMSG_TYPE_FAILOVER_AUTH_ACK 消息，表示投票给该 slave。某个 slave 如果在一段时间内收到了大部分 master 的投票，则表示选举成功。<br>被选中的 slave 会执行 SLAVEOF no one 命令，成为新的 master<br>新的 master 会撤销所有对已下线 master 的 slot 指派，并将这些 slot 全部指派给自己<br>新的 master 向集群广播一条 PONG 消息，这条 PONG 消息可以让集群中的其他节点立即知道自己已经由 slave 变成了 master ，并且这个 master 已经接管了原本由已下线节点负责处理的 slot<br>新的 master 开始接收和自己负责处理的 slot 有关的命令请求，故障转移完成</p>
+<h2 id="手动-Failover"><a href="#手动-Failover" class="headerlink" title="手动 Failover"></a>手动 Failover</h2><p>Redis 集群支持手动故障转移，也就是向 slave 发送 CLUSTER  FAILOVER 命令，使其在 master 未下线的情况下，发起故障转移流程，升级为新的 master ，而原来的 master 降级为 slave。<br>为了不丢失数据，向 slave 发送 CLUSTER  FAILOVER 命令后，流程如下：<br>slave 收到命令后，向 master 发送 CLUSTERMSG_TYPE_MFSTART 命令<br>master 收到该命令后，会将其所有客户端置于阻塞状态，也就是在 10s 的时间内，不再处理客户端发来的命令，并且在其发送的心跳包中，会带有 CLUSTERMSG_FLAG0_PAUSED 标记<br>slave 收到 master 发来的，带 CLUSTERMSG_FLAG0_PAUSED 标记的心跳包后，从中获取 master 当前的复制偏移量，slave 等到自己的复制偏移量达到该值后，才会开始执行故障转移流程：发起选举、统计选票、赢得选举、升级为 master 并更新配置<br>CLUSTER  FAILOVER 命令支持两个选项：FORCE 和 TAKEOVER。使用这两个选项，可以改变上述的流程。<br>如果有 FORCE 选项，则 slave 不会与 master 进行交互，master 也不会阻塞其客户端，而是 slave 立即开始故障转移流程：发起选举、统计选票、赢得选举、升级为 master 并更新配置。<br>如果有 TAKEOVER 选项，则更加简单直接，slave 不再发起选举，而是直接将自己升级为 master ，接手原 master 的 slot，增加自己的 configEpoch 后更新配置。<br>因此，使用 FORCE 和 TAKEOVER 选项，master 可以已经下线；而不使用任何选项，只发送 CLUSTER  FAILOVER 命令的话，master 必须在线。</p>
+<h1 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h1><h2 id="详解-Redis-集群中的消息"><a href="#详解-Redis-集群中的消息" class="headerlink" title="详解 Redis 集群中的消息"></a>详解 Redis 集群中的消息</h2><p>搭建 Redis Cluster 时，首先通过 CLUSTER MEET 命令将所有的节点加入到一个集群中，但是并没有在所有节点两两之间都执行 CLUSTER MEET 命令，因为节点之间使用 Gossip 协议进行工作。Gossip 翻译过来就是流言，类似与病毒传播一样，只要一个人感染，如果时间足够，那么和被感染的人在一起的所有人都会被感染，因此随着时间推移，集群内的所有节点都会互相知道对方的存在。<br>在 Redis 集群中，节点信息是如何传播的呢？答案是通过发送 PING 或 PONG 消息时，会包含节点信息，然后进行传播的。先介绍一下 Redis Cluster 中，消息是如何抽象的。一个消息对象可以是 PING、PONG、MEET，也可以是 PUBLISH、FAIL 等。他们都是 clusterMsg 类型的结构，该类型主要由消息包头部和消息数据组成。<br>消息包头部包含签名、消息总大小、版本和发送消息节点的信息。<br>消息数据则是一个联合体 union clusterMsgData，联合体中又有不同的结构体来构建不同的消息。<br>PING、PONG、MEET 属于一类，是 clusterMsgDataGossip 类型的数组，可以存放多个节点的信息，该结构如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Initially we don't know our "name", but we'll find it once we connect</span></span><br><span class="line"><span class="comment"> * to the first node, using the getsockname() function. Then we'll use this</span></span><br><span class="line"><span class="comment"> * address for all the next messages. */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="comment">// 节点名字</span></span><br><span class="line">    <span class="keyword">char</span> nodename[CLUSTER_NAMELEN];</span><br><span class="line">    <span class="comment">// 最近一次发送PING的时间戳</span></span><br><span class="line">    <span class="keyword">uint32_t</span> ping_sent;</span><br><span class="line">    <span class="comment">// 最近一次接收PONG的时间戳</span></span><br><span class="line">    <span class="keyword">uint32_t</span> pong_received;</span><br><span class="line">    <span class="comment">// 节点的IP地址</span></span><br><span class="line">    <span class="keyword">char</span> ip[NET_IP_STR_LEN];  <span class="comment">/* IP address last time it was seen */</span></span><br><span class="line">    <span class="comment">// 节点的端口号</span></span><br><span class="line">    <span class="keyword">uint16_t</span> port;              <span class="comment">/* port last time it was seen */</span></span><br><span class="line">    <span class="comment">// 节点的标识</span></span><br><span class="line">    <span class="keyword">uint16_t</span> flags;             <span class="comment">/* node-&gt;flags copy */</span></span><br><span class="line">    <span class="comment">// 未使用</span></span><br><span class="line">    <span class="keyword">uint16_t</span> notused1;          <span class="comment">/* Some room for future improvements. */</span></span><br><span class="line">    <span class="keyword">uint32_t</span> notused2;</span><br><span class="line">&#125; clusterMsgDataGossip;</span><br></pre></td></tr></table></figure>
+<p>​<br>每次发送 MEET、PING、PONG 消息时，发送者都从自己的已知节点列表中随机选出两个节点（可以是主节点或者从节点），并将这两个被选中节点的信息分别保存到两个结构中。当接收者收到消息时，接收者会访问消息正文中的两个结构，并根据自己是否认识 clusterMsgDataGossip 结构中记录的被选中节点进行操作：<br>如果被选中节点不存在于接收者的已知节点列表，那么说明接收者是第一次接触到被选中节点，接收者将根据结构中记录的IP地址和端口号等信息，与被选择节点进行握手。<br>如果被选中节点已经存在于接收者的已知节点列表，那么说明接收者之前已经与被选中节点进行过接触，接收者将根据 clusterMsgDataGossip 结构记录的信息，对被选中节点对应的 clusterNode 结构进行更新。<br>有了消息之后，如何选择发送消息的目标节点呢？虽然 PING PONG 发送的频率越高就可以越实时得到其它节点的状态数据，但 Gossip 消息体积较大，高频发送接收会加重网络带宽和消耗 CPU 的计算能力，因此每次 Redis 集群都会有目的性地选择一些节点；但节点选择过少又会影响故障判断的速度，Redis 集群的 Gossip 协议选择这样的解决方案：</p>
+<h2 id="集群数据一致性"><a href="#集群数据一致性" class="headerlink" title="集群数据一致性"></a>集群数据一致性</h2><p>Redis 集群尽可能保证数据的一致性，但在特定条件下会丢失数据，原因有两点：异步复制机制以及可能出现的网络分区造成脑裂问题。</p>
+<h3 id="异步复制"><a href="#异步复制" class="headerlink" title="异步复制"></a>异步复制</h3><p>master 以及对应的 slaves 之间使用异步复制机制，考虑如下场景：<br>写命令提交到 master，master 执行完毕后向客户端返回 OK，但由于复制的延迟此时数据还没传播给 slave；如果此时 master 不可达的时间超过阀值，此时集群将触发 failover，将对应的 slave 选举为新的master，此时由于该 slave 没有收到复制流，因此没有同步到 slave 的数据将丢失。</p>
+<h3 id="脑裂-split-brain"><a href="#脑裂-split-brain" class="headerlink" title="脑裂(split-brain)"></a>脑裂(split-brain)</h3><p>在发生网络分区时，有可能出现新旧 master 同时存在的情况，考虑如下场景：<br>由于网络分区，此时 master 不可达，且客户端与 master 处于一个分区，并且由于网络不可达，此时客户端仍会向 master 写入。由于 failover 机制，将其中一个 slave 提升为新的 master，等待网络分区消除后，老的 master 再次可达，但此时该节点会被降为 slave 清空自身数据然后复制新的 master ，而在这段网络分区期间，客户端仍然将写命令提交到老的 master，但由于被降为 slave 角色这些数据将永远丢失。<br><img src="/2020/06/18/Redis学习/Redis集群模式介绍/Redis-cluster3.png" alt="avatar"></p>
+<h3 id="大多数-master-宕机的情况"><a href="#大多数-master-宕机的情况" class="headerlink" title="大多数 master 宕机的情况"></a>大多数 master 宕机的情况</h3><p>如果集群中少数 master 节点宕机，那么 Redis Cluster 依靠自身的机制可以提升相应的 slave 为 master 对外继续提高服务，但是一旦集群中大多数 master 节点都挂掉，那么集群本质上已经不可用了，即使双机房部署下，你的 slave 全部存活也没办法，那么如何解决这个问题呢？请参考 6.4 Squirrel 的机房容灾</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://redis.io/topics/cluster-spec" target="_blank">Redis Cluster Specification</a><br><a href="https://redis.io/topics/cluster-tutorial" target="_blank">Redis cluster tutorial</a><br><a href="https://cristian.regolo.cc/2015/09/05/life-in-a-redis-cluster.html" target="_blank">Life in a Redis Cluster: Meet and Gossip with your neighbors</a><br><a href="https://www.cnblogs.com/leeSmall/p/8414687.html" target="_blank">Redis系列九：redis集群高可用</a><br><a href="https://www.cnblogs.com/gqtcgq/p/7247042.html" target="_blank">Redis源码解析：27集群(三)主从复制、故障转移</a><br>《Redis 设计与实现》黄建宏著</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/中间件/" rel="tag"># 中间件</a>
+          
+            <a href="/tags/Redis/" rel="tag"># Redis</a>
+          
+            <a href="/tags/缓存/" rel="tag"># 缓存</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/17/es常用api/" rel="next" title="elasticsearch常用API">
+                <i class="fa fa-chevron-left"></i> elasticsearch常用API
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/06/18/一致性Hash介绍/" rel="prev" title="一致性hash介绍">
+                一致性hash介绍 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">WDB</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis-Cluster"><span class="nav-number">1.</span> <span class="nav-text">Redis Cluster</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-集群方案的演变"><span class="nav-number">1.1.</span> <span class="nav-text">Redis 集群方案的演变</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-Cluster-简介"><span class="nav-number">1.2.</span> <span class="nav-text">Redis Cluster 简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三种集群方案的优缺点"><span class="nav-number">1.3.</span> <span class="nav-text">三种集群方案的优缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端分片"><span class="nav-number">1.3.1.</span> <span class="nav-text">客户端分片</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代理层分片"><span class="nav-number">1.3.2.</span> <span class="nav-text">代理层分片</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-Cluster-1"><span class="nav-number">1.3.3.</span> <span class="nav-text">Redis Cluster</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#哈希槽"><span class="nav-number">2.</span> <span class="nav-text">哈希槽</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是哈希槽"><span class="nav-number">2.1.</span> <span class="nav-text">什么是哈希槽</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#哈希槽计算方法"><span class="nav-number">2.2.</span> <span class="nav-text">哈希槽计算方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#哈希槽的内部实现"><span class="nav-number">2.3.</span> <span class="nav-text">哈希槽的内部实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#哈希槽的迁移"><span class="nav-number">2.4.</span> <span class="nav-text">哈希槽的迁移</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MOVED-amp-ASK"><span class="nav-number">3.</span> <span class="nav-text">MOVED &amp; ASK</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#详解-MOVED"><span class="nav-number">3.1.</span> <span class="nav-text">详解 MOVED</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#详解-ASK"><span class="nav-number">3.2.</span> <span class="nav-text">详解 ASK</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#客户端处理"><span class="nav-number">3.3.</span> <span class="nav-text">客户端处理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#故障检测"><span class="nav-number">4.</span> <span class="nav-text">故障检测</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#故障转移（Failover）"><span class="nav-number">5.</span> <span class="nav-text">故障转移（Failover）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#纪元（epoch）"><span class="nav-number">5.1.</span> <span class="nav-text">纪元（epoch）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#currentEpoch"><span class="nav-number">5.1.1.</span> <span class="nav-text">currentEpoch</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#currentEpoch-作用"><span class="nav-number">5.1.2.</span> <span class="nav-text">currentEpoch 作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#configEpoch"><span class="nav-number">5.1.3.</span> <span class="nav-text">configEpoch</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#configEpoch-作用"><span class="nav-number">5.1.4.</span> <span class="nav-text">configEpoch 作用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自动-Failover"><span class="nav-number">5.2.</span> <span class="nav-text">自动 Failover</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#手动-Failover"><span class="nav-number">5.3.</span> <span class="nav-text">手动 Failover</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#写在最后"><span class="nav-number">6.</span> <span class="nav-text">写在最后</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#详解-Redis-集群中的消息"><span class="nav-number">6.1.</span> <span class="nav-text">详解 Redis 集群中的消息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群数据一致性"><span class="nav-number">6.2.</span> <span class="nav-text">集群数据一致性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#异步复制"><span class="nav-number">6.2.1.</span> <span class="nav-text">异步复制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#脑裂-split-brain"><span class="nav-number">6.2.2.</span> <span class="nav-text">脑裂(split-brain)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#大多数-master-宕机的情况"><span class="nav-number">6.2.3.</span> <span class="nav-text">大多数 master 宕机的情况</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">7.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">WDB</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/schemes/muse.js?v=7.0.1"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
