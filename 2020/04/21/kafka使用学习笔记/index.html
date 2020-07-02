@@ -103,14 +103,14 @@
 
 
   <meta name="description" content="kafka是由Linkedin开源的一个分布式流式系统，它的最大的特性就是可以实时的处理大量数据以满足各种需求场景：比如基于hadoop的批处理系统、低延迟的实时系统、storm/Spark流式处理引擎，web/nginx日志、访问日志，消息服务等等，通常我们使用过程中以消息系统来使用，kafka有很多优势，比如高可用，高吞吐等，在这里简单记录一下对一些特性的理解和学习">
-<meta name="keywords" content="kafka,消息MQ,中间件">
+<meta name="keywords" content="中间件,kafka,消息MQ">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Kafka使用学习笔记">
 <meta property="og:url" content="http://www.wangdongbing.com/2020/04/21/kafka使用学习笔记/index.html">
 <meta property="og:site_name" content="好好学习,天天向上">
 <meta property="og:description" content="kafka是由Linkedin开源的一个分布式流式系统，它的最大的特性就是可以实时的处理大量数据以满足各种需求场景：比如基于hadoop的批处理系统、低延迟的实时系统、storm/Spark流式处理引擎，web/nginx日志、访问日志，消息服务等等，通常我们使用过程中以消息系统来使用，kafka有很多优势，比如高可用，高吞吐等，在这里简单记录一下对一些特性的理解和学习">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-07-02T06:05:35.878Z">
+<meta property="og:updated_time" content="2020-07-02T06:50:58.259Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Kafka使用学习笔记">
 <meta name="twitter:description" content="kafka是由Linkedin开源的一个分布式流式系统，它的最大的特性就是可以实时的处理大量数据以满足各种需求场景：比如基于hadoop的批处理系统、低延迟的实时系统、storm/Spark流式处理引擎，web/nginx日志、访问日志，消息服务等等，通常我们使用过程中以消息系统来使用，kafka有很多优势，比如高可用，高吞吐等，在这里简单记录一下对一些特性的理解和学习">
@@ -406,7 +406,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2020-07-02 14:05:35" itemprop="dateModified" datetime="2020-07-02T14:05:35+08:00">2020-07-02</time>
+                <time title="修改时间：2020-07-02 14:50:58" itemprop="dateModified" datetime="2020-07-02T14:50:58+08:00">2020-07-02</time>
               
             
           </span>
@@ -484,6 +484,8 @@
 <li>1代表等待leader节点返回成功，其他replica节点通过fetcher同步，在这里发生leader切换的时候，可能会丢数据</li>
 <li>-1代表所有的 ISR机器同步成功才返回，采用强一致性，可用性最高，但会带来延迟问题</li>
 </ul>
+<h2 id="kafka集群MHA"><a href="#kafka集群MHA" class="headerlink" title="kafka集群MHA"></a>kafka集群MHA</h2><h3 id="controller选主"><a href="#controller选主" class="headerlink" title="controller选主"></a>controller选主</h3><p>controller是kafka集群中，在所有broker中选出来一个leader，选举过程是所有broker都去zk创建一个临时节点(/controller)，只有一个会注册成功，即成为controller节点，竞选失败的broker会在改节点下注册watch，<br>controller节点用来管理kafka集群状态，parition的分配，parition的leader选举等，相较于之前每个parition都通过zk选主的方式，不会注册大量watch，不会产生惊群效应，对zk的压力不会太大，且不会脑裂</p>
+<h3 id="parition选主"><a href="#parition选主" class="headerlink" title="parition选主"></a>parition选主</h3><p>如上所述，parition的选主有controller节点来控制，具体做法是zk中会维护一个parition的所有可用分区信息ISR(in-sync-replicas),然后controller根据配置的选举算法选出一个leader，controller与broker之间的通信直接通过RPC的方式<br>具体算法有：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> NoOpLeaderSelector</span><br><span class="line">offlinePartitionLeader</span><br><span class="line">reassignedPartitionLeader</span><br><span class="line">preferredReplicaPartitionLeader</span><br><span class="line">ControlledShutdownLeader</span><br></pre></td></tr></table></figure></p>
 <h2 id="语义"><a href="#语义" class="headerlink" title="语义"></a>语义</h2><p>Kafka实现了三种语义，下面我们将从生产者和消费者的角度分别分析对各个语义的支持以及实现</p>
 <h3 id="At-most-once"><a href="#At-most-once" class="headerlink" title="At most once"></a>At most once</h3><h4 id="Producer"><a href="#Producer" class="headerlink" title="Producer"></a>Producer</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">acks=0  retries=0</span><br><span class="line">acks可选项：[0，1，all]。</span><br></pre></td></tr></table></figure>
 <p>0表示Producer发送完消息后不会等待任何Broker的确认<br>1表示Producer会等待Broker集群中的leader的确认写入消息<br>all表示Producer需要等待Broker集群中leader和其所有follower的确认写入消息</p>
@@ -525,11 +527,11 @@
       
         <div class="post-tags">
           
+            <a href="/tags/中间件/" rel="tag"># 中间件</a>
+          
             <a href="/tags/kafka/" rel="tag"># kafka</a>
           
             <a href="/tags/消息MQ/" rel="tag"># 消息MQ</a>
-          
-            <a href="/tags/中间件/" rel="tag"># 中间件</a>
           
         </div>
       
@@ -805,7 +807,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#高吞吐、低延迟"><span class="nav-number">1.</span> <span class="nav-text">高吞吐、低延迟</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#磁盘顺序写入"><span class="nav-number">1.1.</span> <span class="nav-text">磁盘顺序写入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#zero-copy"><span class="nav-number">1.2.</span> <span class="nav-text">zero-copy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Page-Cache"><span class="nav-number">1.3.</span> <span class="nav-text">Page Cache</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分区"><span class="nav-number">1.4.</span> <span class="nav-text">分区</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#批量发送"><span class="nav-number">1.5.</span> <span class="nav-text">批量发送</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据压缩"><span class="nav-number">1.6.</span> <span class="nav-text">数据压缩</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#高可用"><span class="nav-number">2.</span> <span class="nav-text">高可用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#语义"><span class="nav-number">3.</span> <span class="nav-text">语义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#At-most-once"><span class="nav-number">3.1.</span> <span class="nav-text">At most once</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Producer"><span class="nav-number">3.1.1.</span> <span class="nav-text">Producer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Consumer"><span class="nav-number">3.1.2.</span> <span class="nav-text">Consumer</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#At-least-once"><span class="nav-number">3.2.</span> <span class="nav-text">At least once</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Producer-1"><span class="nav-number">3.2.1.</span> <span class="nav-text">Producer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Consumer-1"><span class="nav-number">3.2.2.</span> <span class="nav-text">Consumer</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Exactly-once"><span class="nav-number">3.3.</span> <span class="nav-text">Exactly once</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Producer-2"><span class="nav-number">3.3.1.</span> <span class="nav-text">Producer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Consumer-2"><span class="nav-number">3.3.2.</span> <span class="nav-text">Consumer</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一些常用命令"><span class="nav-number">4.</span> <span class="nav-text">一些常用命令</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#高吞吐、低延迟"><span class="nav-number">1.</span> <span class="nav-text">高吞吐、低延迟</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#磁盘顺序写入"><span class="nav-number">1.1.</span> <span class="nav-text">磁盘顺序写入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#zero-copy"><span class="nav-number">1.2.</span> <span class="nav-text">zero-copy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Page-Cache"><span class="nav-number">1.3.</span> <span class="nav-text">Page Cache</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分区"><span class="nav-number">1.4.</span> <span class="nav-text">分区</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#批量发送"><span class="nav-number">1.5.</span> <span class="nav-text">批量发送</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据压缩"><span class="nav-number">1.6.</span> <span class="nav-text">数据压缩</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#高可用"><span class="nav-number">2.</span> <span class="nav-text">高可用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kafka集群MHA"><span class="nav-number">3.</span> <span class="nav-text">kafka集群MHA</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#controller选主"><span class="nav-number">3.1.</span> <span class="nav-text">controller选主</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#parition选主"><span class="nav-number">3.2.</span> <span class="nav-text">parition选主</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#语义"><span class="nav-number">4.</span> <span class="nav-text">语义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#At-most-once"><span class="nav-number">4.1.</span> <span class="nav-text">At most once</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Producer"><span class="nav-number">4.1.1.</span> <span class="nav-text">Producer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Consumer"><span class="nav-number">4.1.2.</span> <span class="nav-text">Consumer</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#At-least-once"><span class="nav-number">4.2.</span> <span class="nav-text">At least once</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Producer-1"><span class="nav-number">4.2.1.</span> <span class="nav-text">Producer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Consumer-1"><span class="nav-number">4.2.2.</span> <span class="nav-text">Consumer</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Exactly-once"><span class="nav-number">4.3.</span> <span class="nav-text">Exactly once</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Producer-2"><span class="nav-number">4.3.1.</span> <span class="nav-text">Producer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Consumer-2"><span class="nav-number">4.3.2.</span> <span class="nav-text">Consumer</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一些常用命令"><span class="nav-number">5.</span> <span class="nav-text">一些常用命令</span></a></li></ol></div>
             
 
           </div>
