@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5">
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="在最近学习databus的过程中，除了看源码，还有很重要的就是实操，databus搭建，测试，链接msyql，orcle，将整个系统跑起来，有助于源码的理解，下面以msyql为例，将整个流程执行一遍">
+<meta name="keywords" content="databus,binlog,教程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="databus安装教程">
+<meta property="og:url" content="http://www.wangdongbing.com/2019/08/14/databus学习笔记/databus安装教程/index.html">
+<meta property="og:site_name" content="好好学习,天天向上">
+<meta property="og:description" content="在最近学习databus的过程中，除了看源码，还有很重要的就是实操，databus搭建，测试，链接msyql，orcle，将整个系统跑起来，有助于源码的理解，下面以msyql为例，将整个流程执行一遍">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://www.wangdongbing.com/2019/08/14/databus学习笔记/databus安装教程/databus-relay.png">
+<meta property="og:updated_time" content="2020-07-02T06:37:12.447Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="databus安装教程">
+<meta name="twitter:description" content="在最近学习databus的过程中，除了看源码，还有很重要的就是实操，databus搭建，测试，链接msyql，orcle，将整个系统跑起来，有助于源码的理解，下面以msyql为例，将整个流程执行一遍">
+<meta name="twitter:image" content="http://www.wangdongbing.com/2019/08/14/databus学习笔记/databus安装教程/databus-relay.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://www.wangdongbing.com/2019/08/14/databus学习笔记/databus安装教程/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>databus安装教程 | 好好学习,天天向上</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">好好学习,天天向上</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2019/08/14/databus学习笔记/databus安装教程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="WDB">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好学习,天天向上">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">databus安装教程
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-08-14 16:25:44" itemprop="dateCreated datePublished" datetime="2019-08-14T16:25:44+08:00">2019-08-14</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-07-02 14:37:12" itemprop="dateModified" datetime="2020-07-02T14:37:12+08:00">2020-07-02</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/databus/" itemprop="url" rel="index"><span itemprop="name">databus</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在最近学习databus的过程中，除了看源码，还有很重要的就是实操，databus搭建，测试，链接msyql，orcle，将整个系统跑起来，有助于源码的理解，下面以msyql为例，将整个流程执行一遍<br><a id="more"></a></p>
+<h2 id="准备mysql"><a href="#准备mysql" class="headerlink" title="准备mysql"></a>准备mysql</h2><p>1：首先确认据库是否开启binlog,如果binlog没有开启，可以通过set sql_log_bin=1命令来启用<br>2：配置数据库binlog_format=ROW， show variables like ‘binlog_format‘可查看日志格式， set globle binlog_format=ROW可修改，最好在my.cnf中修改<br>3：binlog_checksum设置为空，show global variables like ‘binlog_checksum’命令可查看，set binlog_checksum=none可设值，同样最好在my.cnf中修改<br>4：确认my.cnf中有server_id配置，设置之后需要重启</p>
+<h2 id="下载源码"><a href="#下载源码" class="headerlink" title="下载源码"></a>下载源码</h2><p>Databus官网下载源码，下载地址<a href="https://github.com/linkedin/databus.git" target="_blank" rel="noopener">https://github.com/linkedin/databus.git</a>.<br>我们需要用到databus目录下的databus2-example文件夹，在此基础上改造并运行，目录结构及介绍如下：<br>database：数据库模拟相关的脚本和工具<br>databus2-example-bst-producer-pkg：bootstrap producer的属性配置文件夹，包括bootstrap producer和log4j属性文件，build脚本以及bootstrap producer的启动和停止脚本。<br>databus2-example-client-pkg：client的属性配置文件夹，包括各种属性文件和启动和停止脚本。<br>databus2-example-client：client源代码，包含启动主类和消费者代码逻辑。<br>databus2-example-relay-pkg：relay的属性配置文件夹，包含监控的表的source信息和Avro schema。<br>databus2-example-relay：relay的启动主类。<br>schemas_registry：存放表的avsc文件。</p>
+<h2 id="Relay端配置"><a href="#Relay端配置" class="headerlink" title="Relay端配置"></a>Relay端配置</h2><p>Relay属性文件：databus2-example-relay-pkg/conf/relay-or-person.properties为relay配置，包括端口号，buffer存储策略，maxScn存放地址等信息，重点关注maxScn的存放地址，relay启动之后会在改目录下创建MaxScn_Person文件，需要确保有权限写入<br>databus.relay.dataSources.sequenceNumbersHandler.file.scnDir=/tmp/maxScn<br>被监控表配置文件：databus2-example-relay-pkg/conf/sources-or-person.json<br>其中URI format:mysql://username/password@mysql_host[:mysql_port]/mysql_serverid/binlog_prefix，注意%2F为转义字符，用户名为root,数据库密码为root。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"name"</span> : <span class="string">"person"</span>,</span><br><span class="line">    <span class="attr">"id"</span>  : <span class="number">1</span>,</span><br><span class="line">    <span class="attr">"uri"</span> : <span class="string">"mysql://root%2Froot@localhost:3306/1/mysql-bin"</span>,</span><br><span class="line">    <span class="attr">"slowSourceQueryThreshold"</span> : <span class="number">2000</span>,</span><br><span class="line">    <span class="attr">"sources"</span> :</span><br><span class="line">    [</span><br><span class="line">        &#123;</span><br><span class="line">        <span class="attr">"id"</span> : <span class="number">40</span>,</span><br><span class="line">        <span class="attr">"name"</span> : <span class="string">"com.linkedin.events.example.or_test.Person"</span>,</span><br><span class="line">        <span class="attr">"uri"</span>: <span class="string">"or_test.person"</span>,</span><br><span class="line">        <span class="attr">"partitionFunction"</span> : <span class="string">"constant:1"</span></span><br><span class="line">         &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br><span class="line">``` </span><br><span class="line">databus2-example-relay-pkg/schemas_registry/下定义person的Avro schema文件 com.linkedin.events.example.or_test.Person.1.avsc，其中1表示版本(Databus目前没有针对mysql提供生成Avro schema文件的工具，所以只能手工编写)具体内容如下所示：</span><br><span class="line"></span><br><span class="line">``` json</span><br><span class="line">&#123;</span><br><span class="line">  <span class="attr">"name"</span> : <span class="string">"Person_V1"</span>,</span><br><span class="line">  <span class="attr">"doc"</span> : <span class="string">"Auto-generated Avro schema for sy$person. Generated at Dec 04, 2012 05:07:05 PM PST"</span>,</span><br><span class="line">  <span class="attr">"type"</span> : <span class="string">"record"</span>,</span><br><span class="line">  <span class="attr">"meta"</span> : <span class="string">"dbFieldName=person;pk=id;"</span>,</span><br><span class="line">  <span class="attr">"namespace"</span> : <span class="string">"com.linkedin.events.example.or_test"</span>,</span><br><span class="line">  <span class="attr">"fields"</span> : [ &#123;</span><br><span class="line">    <span class="attr">"name"</span> : <span class="string">"id"</span>,</span><br><span class="line">    <span class="attr">"type"</span> : [ <span class="string">"long"</span>, <span class="string">"null"</span> ],</span><br><span class="line">    <span class="attr">"meta"</span> : <span class="string">"dbFieldName=ID;dbFieldPosition=0;"</span></span><br><span class="line">  &#125;, &#123;</span><br><span class="line">    <span class="attr">"name"</span> : <span class="string">"firstName"</span>,</span><br><span class="line">    <span class="attr">"type"</span> : [ <span class="string">"string"</span>, <span class="string">"null"</span> ],</span><br><span class="line">    <span class="attr">"meta"</span> : <span class="string">"dbFieldName=FIRST_NAME;dbFieldPosition=1;"</span></span><br><span class="line">  &#125;, &#123;</span><br><span class="line">    <span class="attr">"name"</span> : <span class="string">"lastName"</span>,</span><br><span class="line">    <span class="attr">"type"</span> : [ <span class="string">"string"</span>, <span class="string">"null"</span> ],</span><br><span class="line">    <span class="attr">"meta"</span> : <span class="string">"dbFieldName=LAST_NAME;dbFieldPosition=2;"</span></span><br><span class="line">  &#125;, &#123;</span><br><span class="line">    <span class="attr">"name"</span> : <span class="string">"birthDate"</span>,</span><br><span class="line">    <span class="attr">"type"</span> : [ <span class="string">"long"</span>, <span class="string">"null"</span> ],</span><br><span class="line">    <span class="attr">"meta"</span> : <span class="string">"dbFieldName=BIRTH_DATE;dbFieldPosition=3;"</span></span><br><span class="line">  &#125;, &#123;</span><br><span class="line">    <span class="attr">"name"</span> : <span class="string">"deleted"</span>,</span><br><span class="line">    <span class="attr">"type"</span> : [ <span class="string">"string"</span>, <span class="string">"null"</span> ],</span><br><span class="line">    <span class="attr">"meta"</span> : <span class="string">"dbFieldName=DELETED;dbFieldPosition=4;"</span></span><br><span class="line">  &#125; ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注册Avro schema到index.schemas_registry文件,databus2-example-relay-pkg/schemas_registry/index.schemas_registry文件中添加行com.linkedin.events.example.or_test.Person.1.avsc ，每定义一个Avro schema都需要添加进去，relay运行时会到此文件中查找表对应的定义的Avro schema。</p>
+<h2 id="Client端配置"><a href="#Client端配置" class="headerlink" title="Client端配置"></a>Client端配置</h2><p>Client属性文件：databus2-example-client-pkg/conf/client-person.properties的内容如下配置，包括端口号，buffer存储策略，checkpoint持久化等信息：</p>
+<p>databus2-example-client/src/main/java下的PersonConsumer类是消费逻辑回调代码，主要是取出每一个event后依次打印每个字段的名值对，主要代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> ConsumerCallbackResult <span class="title">processEvent</span><span class="params">(DbusEvent event, DbusEventDecoder eventDecoder)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    GenericRecord decodedEvent = eventDecoder.getGenericRecord(event, <span class="keyword">null</span>);</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      Utf8 firstName = (Utf8)decodedEvent.get(<span class="string">"firstName"</span>);</span><br><span class="line">      Utf8 lastName = (Utf8)decodedEvent.get(<span class="string">"lastName"</span>);</span><br><span class="line">      Long birthDate = (Long)decodedEvent.get(<span class="string">"birthDate"</span>);</span><br><span class="line">      Utf8 deleted = (Utf8)decodedEvent.get(<span class="string">"deleted"</span>);</span><br><span class="line">      LOG.info(<span class="string">"firstName: "</span> + firstName.toString() +</span><br><span class="line">                 <span class="string">", lastName: "</span> + lastName.toString() +</span><br><span class="line">                 <span class="string">", birthDate: "</span> + birthDate +</span><br><span class="line">                 <span class="string">", deleted: "</span> + deleted.toString());</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">      LOG.error(<span class="string">"error decoding event "</span>, e);</span><br><span class="line">      <span class="keyword">return</span> ConsumerCallbackResult.ERROR;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> ConsumerCallbackResult.SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>databus2-example-client/src/main/java下的PersonClient类是relay的启动主类，主要是设置启动Client的配置信息，将消费者实例注册到监听器中，后续可对其进行回调，主要代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    DatabusHttpClientImpl.Config configBuilder = <span class="keyword">new</span> DatabusHttpClientImpl.Config();</span><br><span class="line">    <span class="comment">//Try to connect to a relay on localhost</span></span><br><span class="line">    configBuilder.getRuntime().getRelay(<span class="string">"1"</span>).setHost(<span class="string">"localhost"</span>);</span><br><span class="line">    configBuilder.getRuntime().getRelay(<span class="string">"1"</span>).setPort(<span class="number">11115</span>);</span><br><span class="line">    configBuilder.getRuntime().getRelay(<span class="string">"1"</span>).setSources(PERSON_SOURCE);</span><br><span class="line">    <span class="comment">//Instantiate a client using command-line parameters if any</span></span><br><span class="line">    DatabusHttpClientImpl client = DatabusHttpClientImpl.createFromCli(args, configBuilder);</span><br><span class="line">    <span class="comment">//register callbacks</span></span><br><span class="line">    PersonConsumer personConsumer = <span class="keyword">new</span> PersonConsumer();</span><br><span class="line">    client.registerDatabusStreamListener(personConsumer, <span class="keyword">null</span>, PERSON_SOURCE);</span><br><span class="line">    client.registerDatabusBootstrapListener(personConsumer, <span class="keyword">null</span>, PERSON_SOURCE);</span><br><span class="line">    <span class="comment">//fire off the Databus client</span></span><br><span class="line">    client.startAndBlock();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="build-启动-测试"><a href="#build-启动-测试" class="headerlink" title="build-启动-测试"></a>build-启动-测试</h2><p>Build:Databus采用gradle进行编译，所以需要安装gradle环境，安装安成后进入databus根目录执行命令gradle -Dopen_source=true assemble即可完成build,成功后在databus根目录下生成名为build的文件夹</p>
+<h3 id="启动Relay"><a href="#启动Relay" class="headerlink" title="启动Relay:"></a>启动Relay:</h3><p>cd build/databus2-example-relay-pkg/distributions<br>tar -zxvf databus2-example-relay-pkg.tar.gz解压<br>执行启动脚本 ./bin/start-example-relay.sh or_person -Y ./conf/sources-or-person.json<br>执行命令 curl -s <a href="http://localhost:11115/sources返回如下内容说明启动成功：" target="_blank" rel="noopener">http://localhost:11115/sources返回如下内容说明启动成功：</a> </p>
+<h3 id="启动Client"><a href="#启动Client" class="headerlink" title="启动Client:"></a>启动Client:</h3><p>cd build/databus2-example-client-pkg/distributions<br>tar -zxvf databus2-example-client-pkg.tar.gz解压<br>执行启动脚本 ./bin/start-example-client.sh person<br>执行命令 curl <a href="http://localhost:11115/relayStats/outbound/http/clients返回如下内容说明启动成功：" target="_blank" rel="noopener">http://localhost:11115/relayStats/outbound/http/clients返回如下内容说明启动成功：</a> </p>
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><p>Relay和Client启动成功后，就已经开始对person表进行数据变更捕获了，现在向person表插入一条如下记录,databus2-example-relay-pkg/distributions/logs下的relay.log记录如下：<br><img src="/2019/08/14/databus学习笔记/databus安装教程/databus-relay.png" alt="avatar"></p>
+<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>Could not find first log file name in binary log index file</p>
+<p>1: 首先检查binlog是否存在，确认my.cnf中binlog目录，如果没有重新添加目录，重启mysql<br>2：检查当前用户是否有权限读取binlog，binlog的读取需要赋权,具体如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt;CREATE USER &apos;user&apos;@ &apos;X.X.X.X&apos; IDENTIFIED BY &apos;password&apos;;</span><br><span class="line">mysql&gt;GRANT REPLICATION SLAVE ON *.* TO &apos;user&apos;@&apos;X.X.X.X&apos; IDENTIFIED BY &apos;password&apos;;</span><br></pre></td></tr></table></figure></p>
+<p>3: 检查databus-relay-conf中配置的binlog前缀是否可mysql中my.cnf中binlog前缀一致，例如两者都应该为mysql-bin<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">relay-conf: &quot;uri&quot; : &quot;mysql://root%2Froot@127.0.0.1:3306/1/mysql-bin&quot;</span><br><span class="line">my.cnf : log_bin=/app/mysql/datalog/mysql-bin</span><br></pre></td></tr></table></figure></p>
+<p>3: 如果是主从复制遇到这个问题，一般是由于master重启之后导致两边binlog-index不同步，操作步骤如下</p>
+<pre><code class="mysql">slave执行 ：mysql&gt; slave stop;
+master执行：mysql&gt;SHOW MASTER STATUS;
+           mysql&gt; flush logs;
+slave执行 ：mysql&gt; CHANGE MASTER TO MASTER_LOG_FILE=&apos;mysqld-bin.000011&apos;,MASTER_LOG_POS=106;
+           mysql&gt; slave start;
+           mysql&gt; show slave status\G;
+
+</code></pre>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/databus/" rel="tag"># databus</a>
+          
+            <a href="/tags/binlog/" rel="tag"># binlog</a>
+          
+            <a href="/tags/教程/" rel="tag"># 教程</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/08/14/databus学习笔记/mysql安装教程/" rel="next" title="mysql安装教程">
+                <i class="fa fa-chevron-left"></i> mysql安装教程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/03/17/elasticSearch学习笔记/es常用api/" rel="prev" title="elasticsearch常用api">
+                elasticsearch常用api <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">WDB</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">26</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">44</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#准备mysql"><span class="nav-number">1.</span> <span class="nav-text">准备mysql</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#下载源码"><span class="nav-number">2.</span> <span class="nav-text">下载源码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Relay端配置"><span class="nav-number">3.</span> <span class="nav-text">Relay端配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Client端配置"><span class="nav-number">4.</span> <span class="nav-text">Client端配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#build-启动-测试"><span class="nav-number">5.</span> <span class="nav-text">build-启动-测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#启动Relay"><span class="nav-number">5.1.</span> <span class="nav-text">启动Relay:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动Client"><span class="nav-number">5.2.</span> <span class="nav-text">启动Client:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试"><span class="nav-number">5.3.</span> <span class="nav-text">测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#问题"><span class="nav-number">5.4.</span> <span class="nav-text">问题</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">WDB</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/schemes/muse.js?v=7.0.1"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

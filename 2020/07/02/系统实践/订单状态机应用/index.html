@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5">
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="基本概念什么是状态机定义：包含一组状态集（states）、一个起始状态（start state）、一组输入符号集（context）、一个映射输入符号和当前状态到下一状态的转换函数（action）的计算模型。当输入变量，模型随即进入起始状态。它要改变到新的状态，依赖于转换函数。在有限状态机中，会有有许多变量，例如，状态机有很多与事件关联的动作">
+<meta name="keywords" content="项目实践,状态机，订单">
+<meta property="og:type" content="article">
+<meta property="og:title" content="订单状态机实践">
+<meta property="og:url" content="http://www.wangdongbing.com/2020/07/02/系统实践/订单状态机应用/index.html">
+<meta property="og:site_name" content="好好学习,天天向上">
+<meta property="og:description" content="基本概念什么是状态机定义：包含一组状态集（states）、一个起始状态（start state）、一组输入符号集（context）、一个映射输入符号和当前状态到下一状态的转换函数（action）的计算模型。当输入变量，模型随即进入起始状态。它要改变到新的状态，依赖于转换函数。在有限状态机中，会有有许多变量，例如，状态机有很多与事件关联的动作">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/07/02/系统实践/订单状态机应用/state1.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/07/02/系统实践/订单状态机应用/state2.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/07/02/系统实践/订单状态机应用/state3.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/07/02/系统实践/订单状态机应用/state4.png">
+<meta property="og:image" content="http://www.wangdongbing.com/2020/07/02/系统实践/订单状态机应用/state5.png">
+<meta property="og:updated_time" content="2020-07-02T06:37:00.749Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="订单状态机实践">
+<meta name="twitter:description" content="基本概念什么是状态机定义：包含一组状态集（states）、一个起始状态（start state）、一组输入符号集（context）、一个映射输入符号和当前状态到下一状态的转换函数（action）的计算模型。当输入变量，模型随即进入起始状态。它要改变到新的状态，依赖于转换函数。在有限状态机中，会有有许多变量，例如，状态机有很多与事件关联的动作">
+<meta name="twitter:image" content="http://www.wangdongbing.com/2020/07/02/系统实践/订单状态机应用/state1.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://www.wangdongbing.com/2020/07/02/系统实践/订单状态机应用/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>订单状态机实践 | 好好学习,天天向上</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">好好学习,天天向上</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.wangdongbing.com/2020/07/02/系统实践/订单状态机应用/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="WDB">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="好好学习,天天向上">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">订单状态机实践
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-07-02 09:59:02 / 修改时间：14:37:00" itemprop="dateCreated datePublished" datetime="2020-07-02T09:59:02+08:00">2020-07-02</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/系统实践/" itemprop="url" rel="index"><span itemprop="name">系统实践</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h1><h2 id="什么是状态机"><a href="#什么是状态机" class="headerlink" title="什么是状态机"></a>什么是状态机</h2><p>定义：包含一组状态集（states）、一个起始状态（start state）、一组输入符号集（context）、一个映射输入符号和当前状态到下一状态的转换函数（action）的计算模型。当输入变量，模型随即进入起始状态。它要改变到新的状态，依赖于转换函数。在有限状态机中，会有有许多变量，例如，状态机有很多与事件关联的动作<a id="more"></a></p>
+<p>行为：<strong> 状态机通过响应一系列事件而“运行”。</strong> 每个事件都在属于“当前”节点的转移函数的控制范围内，其中函数的范围是节点的一个子集。函数返回“下一个”（也许是同一个）节点。这些节点中至少有一个必须是终态。当到达终态，状态机停止</p>
+<p>分类：状态机的分类包括 <strong>有限状态机， 层次状态机， 行为树－AI</strong></p>
+<p>原理：订单状态机原理主要是根据订单当前的状态去判断可触发哪些事件（Action），对每个可触发的事件作进行check，符合条件的事件则执行相关的逻辑操作。执行完成后将订单状态更新为新的状态，如此循环。</p>
+<h2 id="流程中心控制-amp-阶梯式控制"><a href="#流程中心控制-amp-阶梯式控制" class="headerlink" title="流程中心控制&amp;阶梯式控制"></a>流程中心控制&amp;阶梯式控制</h2><p><img src="/2020/07/02/系统实践/订单状态机应用/state1.png" alt="avatar"></p>
+<p>系统整体控制上要采用流程控制中心，而不是阶梯式控制。之前由于直接依赖数据库，数据库最终会成为影响订单处理的瓶颈，数据的一致性很难得到保证，而采用流程控制中心模式则可以大大减少数据不一致发生的几率，同时可以借助工作流和状态机实现中心控制，这样既便于运营，又方便及时发现和解决问题单据.<br>流程中心控制模式一般使用状态机或者Activity实现。</p>
+<h2 id="状态机的特点"><a href="#状态机的特点" class="headerlink" title="状态机的特点"></a>状态机的特点</h2><p>应用非常广泛，从有限状态机到层次状态机，在发展到后来的行为树，经久不衰，和Activity很像，同类型的产品，但是比较成熟。   </p>
+<h1 id="系统模块"><a href="#系统模块" class="headerlink" title="系统模块"></a>系统模块</h1><p>状态机主要分为三个模块<br><img src="/2020/07/02/系统实践/订单状态机应用/state2.png" alt="avatar"></p>
+<h2 id="状态池"><a href="#状态池" class="headerlink" title="状态池"></a>状态池</h2><p>对所有的订单状态进行管理</p>
+<table>
+<thead>
+<tr>
+<th>orderStatus</th>
+<th style="text-align:center">statusDesc</th>
+<th style="text-align:center">serviceName</th>
+<th style="text-align:center">priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OS0000</td>
+<td style="text-align:center">初始状态</td>
+<td style="text-align:center">SubscribeAction</td>
+<td style="text-align:center">0</td>
+</tr>
+<tr>
+<td>OS0002</td>
+<td style="text-align:center">需求确认</td>
+<td style="text-align:center">A</td>
+<td style="text-align:center">0</td>
+</tr>
+<tr>
+<td>OS0002A</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">B</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td>OS0002G</td>
+<td style="text-align:center">占位成功</td>
+<td style="text-align:center">C</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td>RS0000</td>
+<td style="text-align:center">资源初始化</td>
+<td style="text-align:center">D</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td>RS0001</td>
+<td style="text-align:center">资源添加</td>
+<td style="text-align:center">E</td>
+<td style="text-align:center">0</td>
+</tr>
+<tr>
+<td>RS0002</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">F</td>
+<td style="text-align:center">6</td>
+</tr>
+<tr>
+<td>…</td>
+<td style="text-align:center">…</td>
+<td style="text-align:center">…</td>
+<td style="text-align:center">…</td>
+</tr>
+</tbody>
+</table>
+<h2 id="Action驱动管理"><a href="#Action驱动管理" class="headerlink" title="Action驱动管理"></a>Action驱动管理</h2><p>processEngine负责管理每个状态下可触发执行的Action           </p>
+<h2 id="运行时管理"><a href="#运行时管理" class="headerlink" title="运行时管理"></a>运行时管理</h2><p>订单如何根据自动进行状态变迁</p>
+<h2 id="流程控制"><a href="#流程控制" class="headerlink" title="流程控制"></a>流程控制</h2><p><img src="/2020/07/02/系统实践/订单状态机应用/state3.png" alt="avatar"></p>
+<h1 id="系统架构"><a href="#系统架构" class="headerlink" title="系统架构"></a>系统架构</h1><p> <img src="/2020/07/02/系统实践/订单状态机应用/state4.png" alt="avatar"></p>
+<h2 id="processEngine"><a href="#processEngine" class="headerlink" title="processEngine"></a>processEngine</h2><h3 id="描述"><a href="#描述" class="headerlink" title="描述"></a>描述</h3><p>状态机的引擎，主要获取或初始化当前状态，当有新订单进来之后，将订单上下文传入状态机，状态机根据上下文初始化订单状态，如果没有订单号，则认为是新建订单，初始化状态，processEngine获取当前状态可执行的Action，驱动可执行Action的执行。</p>
+<h3 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h3><p>启动状态机，如果是新订单，初始化订单状态</p>
+<h2 id="action"><a href="#action" class="headerlink" title="action"></a>action</h2><p>状态驱动的业务逻辑单元，当状态机处于某一匹配状态时，可根据Context中的信息执行响应动作<br>action代表当前订单状态下可执行的操作，启动一个action，首先会通过context校验是否满足当前action的执行条件，如果满足，执行run，执行完之后根据结果判断后续状态的变化。</p>
+<h2 id="SubscribeAction"><a href="#SubscribeAction" class="headerlink" title="SubscribeAction"></a>SubscribeAction</h2><p>用户提交订单，订单进入状态机，,初始化订单状态，修改当前订单状态为需求确认</p>
+<table>
+<thead>
+<tr>
+<th>当前订单状态</th>
+<th style="text-align:center">可执行Action1</th>
+<th style="text-align:center">可执行Action2</th>
+<th style="text-align:center">可执行Action3</th>
+<th style="text-align:center">可执行action4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NEED_SURE</td>
+<td style="text-align:center">distributeOrderAction(0)</td>
+<td style="text-align:center">distributeOrderFeedAction(1)</td>
+<td style="text-align:center">orderOccupyAction（2）</td>
+<td style="text-align:center">orderCancelAction(5)</td>
+</tr>
+<tr>
+<td>需求确认</td>
+<td style="text-align:center">客服分单－分单系统</td>
+<td style="text-align:center">分单回调</td>
+<td style="text-align:center">占位</td>
+<td style="text-align:center">订单取消</td>
+</tr>
+</tbody>
+</table>
+<h2 id="OrderOccupyAction"><a href="#OrderOccupyAction" class="headerlink" title="OrderOccupyAction"></a>OrderOccupyAction</h2><table>
+<thead>
+<tr>
+<th>action</th>
+<th style="text-align:center">可执行Action1</th>
+<th style="text-align:center">可执行Action2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OCCUPY_ING</td>
+<td style="text-align:center">添加是否30分钟后添加出游人</td>
+<td style="text-align:center">发起资源占位请求</td>
+</tr>
+</tbody>
+</table>
+<h2 id="resourceAddAction-resourceOccupyAction"><a href="#resourceAddAction-resourceOccupyAction" class="headerlink" title="resourceAddAction  resourceOccupyAction"></a>resourceAddAction  resourceOccupyAction</h2><p>资源状态机发起资源占位，各个资源处于占位中，收到确认管理回调，占位成功或者失败。</p>
+<table>
+<thead>
+<tr>
+<th>资源状态</th>
+<th style="text-align:center">可执行Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>初始化</td>
+<td style="text-align:center">resourceAddAction</td>
+</tr>
+<tr>
+<td>资源状态</td>
+<td style="text-align:center">可执行Action</td>
+</tr>
+<tr>
+<td>资源已添加</td>
+<td style="text-align:center">resourceOccupyAction</td>
+</tr>
+</tbody>
+</table>
+<h2 id="占位成功"><a href="#占位成功" class="headerlink" title="占位成功"></a>占位成功</h2><p>改变当前订单状态为占位成功，并重新进入订单引擎，判断当前可执行的操作action有哪些</p>
+<table>
+<thead>
+<tr>
+<th>状态</th>
+<th style="text-align:center">可操作Action1</th>
+<th style="text-align:center">可操作Action2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>占位成功</td>
+<td style="text-align:center">requireCfmAction（0）</td>
+<td style="text-align:center">orderReleaseAction（2）</td>
+</tr>
+</tbody>
+</table>
+<p>需求确认对于电话订单，出游人不全的订单，跟团游的订单，出境游的订单，OTA需要确认客人信息，确认底层资源的价格日历，是否有出游人变更等。如果没有这些要求，可直接跳过需求确认。</p>
+<h2 id="占位失败"><a href="#占位失败" class="headerlink" title="占位失败"></a>占位失败</h2><table>
+<thead>
+<tr>
+<th>状态</th>
+<th style="text-align:center">可操作Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>占位失败</td>
+<td style="text-align:center">orderCancelAction</td>
+</tr>
+</tbody>
+</table>
+<h2 id="需求确认成功"><a href="#需求确认成功" class="headerlink" title="需求确认成功"></a>需求确认成功</h2><p>改变订单状态为需求确认成功， 订单重新进入状态机<br>状态 |可操作Action1 |可操作Action2<br>–|:–:|:–:<br>需求确认成功 |signAction(3)| reEntryRequireCfmAction(1)<br>是否需要重新打开需求确认，如果需要重新打开需求确认，订单状态改变为占位成功</p>
+<h2 id="确认confirm"><a href="#确认confirm" class="headerlink" title="确认confirm"></a>确认confirm</h2><p>向确认管理发送确认请求， 和占位一样，确认也是按照资源来确认，所有资源回调完成之后，通知订单状态机确认完成。<br>状态 |可操作Action1 |可操作Action2<br>–|:–:|:–:<br>订单确认中 |orderCfmAction(0) |orderCfmFeedBackAction(1)<br>状态 |可操作Action1 |可操作Action2<br>确认成功 |orderCfmAction(0) |orderCfmFeedBackAction(1)</p>
+<p>还有保险,网上签约,出团,评价</p>
+<h2 id="退出状态机"><a href="#退出状态机" class="headerlink" title="退出状态机"></a>退出状态机</h2><p>怎么退出引擎，当所有可执行的action执行完之后，跳出第一层action的循环，再判断状态是否发生改变，context中是否要跳出引擎。</p>
+<h2 id="action的顺序"><a href="#action的顺序" class="headerlink" title="action的顺序"></a>action的顺序</h2><p>订单所有的信息都在context中，可以指定状态机执行特定的action，如果指定action，则引擎只执行这个action，如果没有指定，执行所有action。被执行的所有Action都是有优先级的。</p>
+<h2 id="插件化配置"><a href="#插件化配置" class="headerlink" title="插件化配置"></a>插件化配置</h2><p>对于状态机新增一个action，相当于activity新增一个流程，我们只需在数据库配置流程编号，流程编码，动作名等。热插拔！</p>
+<h2 id="Context"><a href="#Context" class="headerlink" title="Context"></a>Context</h2><p>状态机运行的上下文，与外部服务交互的数据接口，外部服务可将Action执行所需业务参数注入，提供给Action执行时使用。 正在执行的状态的Context需要包含订单号、订单状态、Action执行所需参数等信息。</p>
+<h1 id="对象时序图"><a href="#对象时序图" class="headerlink" title="对象时序图"></a>对象时序图</h1><p> <img src="/2020/07/02/系统实践/订单状态机应用/state5.png" alt="avatar"></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/项目实践/" rel="tag"># 项目实践</a>
+          
+            <a href="/tags/状态机，订单/" rel="tag"># 状态机，订单</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/24/系统实践/系统稳定性建设/" rel="next" title="系统稳定性建设">
+                <i class="fa fa-chevron-left"></i> 系统稳定性建设
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">WDB</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">26</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">44</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#基本概念"><span class="nav-number">1.</span> <span class="nav-text">基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是状态机"><span class="nav-number">1.1.</span> <span class="nav-text">什么是状态机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#流程中心控制-amp-阶梯式控制"><span class="nav-number">1.2.</span> <span class="nav-text">流程中心控制&amp;阶梯式控制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#状态机的特点"><span class="nav-number">1.3.</span> <span class="nav-text">状态机的特点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#系统模块"><span class="nav-number">2.</span> <span class="nav-text">系统模块</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#状态池"><span class="nav-number">2.1.</span> <span class="nav-text">状态池</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Action驱动管理"><span class="nav-number">2.2.</span> <span class="nav-text">Action驱动管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#运行时管理"><span class="nav-number">2.3.</span> <span class="nav-text">运行时管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#流程控制"><span class="nav-number">2.4.</span> <span class="nav-text">流程控制</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#系统架构"><span class="nav-number">3.</span> <span class="nav-text">系统架构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#processEngine"><span class="nav-number">3.1.</span> <span class="nav-text">processEngine</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#描述"><span class="nav-number">3.1.1.</span> <span class="nav-text">描述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#作用"><span class="nav-number">3.1.2.</span> <span class="nav-text">作用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#action"><span class="nav-number">3.2.</span> <span class="nav-text">action</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SubscribeAction"><span class="nav-number">3.3.</span> <span class="nav-text">SubscribeAction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OrderOccupyAction"><span class="nav-number">3.4.</span> <span class="nav-text">OrderOccupyAction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#resourceAddAction-resourceOccupyAction"><span class="nav-number">3.5.</span> <span class="nav-text">resourceAddAction  resourceOccupyAction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#占位成功"><span class="nav-number">3.6.</span> <span class="nav-text">占位成功</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#占位失败"><span class="nav-number">3.7.</span> <span class="nav-text">占位失败</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#需求确认成功"><span class="nav-number">3.8.</span> <span class="nav-text">需求确认成功</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#确认confirm"><span class="nav-number">3.9.</span> <span class="nav-text">确认confirm</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#退出状态机"><span class="nav-number">3.10.</span> <span class="nav-text">退出状态机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#action的顺序"><span class="nav-number">3.11.</span> <span class="nav-text">action的顺序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#插件化配置"><span class="nav-number">3.12.</span> <span class="nav-text">插件化配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Context"><span class="nav-number">3.13.</span> <span class="nav-text">Context</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#对象时序图"><span class="nav-number">4.</span> <span class="nav-text">对象时序图</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">WDB</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/schemes/muse.js?v=7.0.1"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
